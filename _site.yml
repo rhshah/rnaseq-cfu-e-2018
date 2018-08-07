@@ -5,3 +5,6 @@ navbar:
   left:
     - text: "HOME"
       href: _main.html
+output:
+  html_document:
+    highlight: textmate
