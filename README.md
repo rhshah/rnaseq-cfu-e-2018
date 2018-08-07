@@ -338,7 +338,7 @@ plot.new()
 hist(as.matrix(count.table), col = "blue", border = "white", breaks = 100)
 ```
 
-![](_main_files/figure-html/code block 6-1.png)<!-- -->
+![]("_main_files/figure-html/code block 6-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -353,7 +353,7 @@ hist(as.matrix(count.table), col = "blue", border = "white", breaks = 20000,
     ylab = "Number of genes", las = 1, cex.axis = 0.7)
 ```
 
-![](_main_files/figure-html/code block 7-1.png)<!-- -->
+![]("_main_files/figure-html/code block 7-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -369,7 +369,7 @@ hist(as.matrix(log2(count.table + epsilon)), breaks = 100, col = "blue", border 
     las = 1, cex.axis = 0.7)
 ```
 
-![](_main_files/figure-html/code block 8-1.png)<!-- -->
+![]("_main_files/figure-html/code block 8-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -383,7 +383,7 @@ boxplot(log2(count.table + epsilon), col = expDesign$color, pch = ".", horizonta
     cex.axis = 0.5, las = 1, ylab = "Samples", xlab = "log2(Counts +1)")
 ```
 
-![](_main_files/figure-html/code block 9-1.png)<!-- -->
+![]("_main_files/figure-html/code block 9-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -397,7 +397,7 @@ grid()
 legend("topright", legend = names(col.sampletype), col = col.sampletype, lwd = 2)
 ```
 
-![](_main_files/figure-html/code block 10-1.png)<!-- -->
+![]("_main_files/figure-html/code block 10-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -420,7 +420,7 @@ pairs(log2(count.table[, sample(ncol(count.table), 12)] + epsilon), panel = plot
     lower.panel = NULL)
 ```
 
-![](_main_files/figure-html/code block 11-1.png)<!-- -->
+![]("_main_files/figure-html/code block 11-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -435,7 +435,7 @@ barplot(prop.null, main = "Percentage of null counts per sample", horiz = TRUE,
     cex.names = 0.5, las = 1, col = expDesign$color, ylab = "Samples", xlab = "% of null counts")
 ```
 
-![](_main_files/figure-html/code block 12-1.png)<!-- -->
+![]("_main_files/figure-html/code block 12-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -463,7 +463,7 @@ boxplot(log2(counts(dds.norm, normalized = TRUE) + epsilon), col = col.sampletyp
     main = "Normalized counts")
 ```
 
-![](_main_files/figure-html/code block 14-1.png)<!-- -->
+![]("_main_files/figure-html/code block 14-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -479,7 +479,7 @@ plotDensity(log2(counts(dds.norm, normalized = TRUE) + epsilon), col = col.sampl
     xlab = "log2(normalized counts)", cex.lab = 0.7)
 ```
 
-![](_main_files/figure-html/code block 15-1.png)<!-- -->
+![]("_main_files/figure-html/code block 15-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -690,7 +690,7 @@ plot(x = log2(mean.counts), y = log2(variance.counts), pch = 16, cex = 0.5,
 abline(a = 0, b = 1, col = "brown")
 ```
 
-![](_main_files/figure-html/code block 16-1.png)<!-- -->
+![]("_main_files/figure-html/code block 16-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -706,7 +706,7 @@ dds.disp <- estimateDispersions(dds.norm)
 plotDispEsts(dds.disp)
 ```
 
-![](_main_files/figure-html/code block 17-1.png)<!-- -->
+![]("_main_files/figure-html/code block 17-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -724,7 +724,7 @@ hmcol <- colorRampPalette(brewer.pal(11, "Spectral"))(12)
 plotPCA(rld, ntop = 5000, intgroup = c("condition", "experiment")) + scale_color_manual(values = hmcol)
 ```
 
-![](_main_files/figure-html/code block 18-1.png)<!-- -->
+![]("_main_files/figure-html/code block 18-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -740,7 +740,7 @@ pheatmap(assay(rld)[select, ], cluster_rows = TRUE, show_rownames = TRUE, cluste
     annotation_col = df)
 ```
 
-![](_main_files/figure-html/code block 19-1.png)<!-- -->
+![]("_main_files/figure-html/code block 19-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -758,7 +758,7 @@ pheatmap(sampleDistMatrix, clustering_distance_rows = sampleDists, clustering_di
     col = colors)
 ```
 
-![](_main_files/figure-html/code block 20-1.png)<!-- -->
+![]("_main_files/figure-html/code block 20-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -823,7 +823,7 @@ plotMA(res_WT_EV, xlim = xlim, ylim = ylim, main = "normal")
 plotMA(res_WT_EV_ashr, xlim = xlim, ylim = ylim, main = "ashr")
 ```
 
-![](_main_files/figure-html/code block 22-1.png)<!-- -->
+![]("_main_files/figure-html/code block 22-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -836,7 +836,7 @@ hist(res_WT_EV$padj, breaks = 20, col = "grey", main = "DESeq2 p-value distribut
     xlab = "DESeq2 P-value", ylab = "Number of genes")
 ```
 
-![](_main_files/figure-html/code block 23-1.png)<!-- -->
+![]("_main_files/figure-html/code block 23-1.png")<!-- -->
 
 ###### Volacano-plot
 
@@ -851,7 +851,7 @@ grid.arrange(WT_EV_p1, WT_EV_p2, nrow = 2, ncol = 1)
 grid.rect(gp = gpar(fill = NA))
 ```
 
-![](_main_files/figure-html/code block 24-1.png)<!-- -->
+![]("_main_files/figure-html/code block 24-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -867,7 +867,7 @@ for (i in head(ord, nBestFeatures)) {
 }
 ```
 
-![](_main_files/figure-html/code block 25-1.png)<!-- -->![](_main_files/figure-html/code block 25-2.png)<!-- -->![](_main_files/figure-html/code block 25-3.png)<!-- -->![](_main_files/figure-html/code block 25-4.png)<!-- -->![](_main_files/figure-html/code block 25-5.png)<!-- -->![](_main_files/figure-html/code block 25-6.png)<!-- -->![](_main_files/figure-html/code block 25-7.png)<!-- -->![](_main_files/figure-html/code block 25-8.png)<!-- -->![](_main_files/figure-html/code block 25-9.png)<!-- -->![](_main_files/figure-html/code block 25-10.png)<!-- -->![](_main_files/figure-html/code block 25-11.png)<!-- -->![](_main_files/figure-html/code block 25-12.png)<!-- -->![](_main_files/figure-html/code block 25-13.png)<!-- -->![](_main_files/figure-html/code block 25-14.png)<!-- -->![](_main_files/figure-html/code block 25-15.png)<!-- -->![](_main_files/figure-html/code block 25-16.png)<!-- -->![](_main_files/figure-html/code block 25-17.png)<!-- -->![](_main_files/figure-html/code block 25-18.png)<!-- -->![](_main_files/figure-html/code block 25-19.png)<!-- -->![](_main_files/figure-html/code block 25-20.png)<!-- -->
+![]("_main_files/figure-html/code block 25-1.png")<!-- -->![]("_main_files/figure-html/code block 25-2.png")<!-- -->![]("_main_files/figure-html/code block 25-3.png")<!-- -->![]("_main_files/figure-html/code block 25-4.png")<!-- -->![]("_main_files/figure-html/code block 25-5.png")<!-- -->![]("_main_files/figure-html/code block 25-6.png")<!-- -->![]("_main_files/figure-html/code block 25-7.png")<!-- -->![]("_main_files/figure-html/code block 25-8.png")<!-- -->![]("_main_files/figure-html/code block 25-9.png")<!-- -->![]("_main_files/figure-html/code block 25-10.png")<!-- -->![]("_main_files/figure-html/code block 25-11.png")<!-- -->![]("_main_files/figure-html/code block 25-12.png")<!-- -->![]("_main_files/figure-html/code block 25-13.png")<!-- -->![]("_main_files/figure-html/code block 25-14.png")<!-- -->![]("_main_files/figure-html/code block 25-15.png")<!-- -->![]("_main_files/figure-html/code block 25-16.png")<!-- -->![]("_main_files/figure-html/code block 25-17.png")<!-- -->![]("_main_files/figure-html/code block 25-18.png")<!-- -->![]("_main_files/figure-html/code block 25-19.png")<!-- -->![]("_main_files/figure-html/code block 25-20.png")<!-- -->
 
 ##### Select genes based on FDR and make heatmap
 
@@ -885,7 +885,7 @@ for (i in head(ord, nBestFeatures)) {
             cexCol=0.7)
 ```
 
-![](_main_files/figure-html/code black 26-1.png)<!-- -->
+![]("_main_files/figure-html/code black 26-1.png")<!-- -->
 
 ```r
   invisible(dev.off())
@@ -1093,7 +1093,7 @@ plotMA(res_WT_EH, xlim = xlim, ylim = ylim, main = "normal")
 plotMA(res_WT_EH_ashr, xlim = xlim, ylim = ylim, main = "ashr")
 ```
 
-![](_main_files/figure-html/code block 28-1.png)<!-- -->
+![]("_main_files/figure-html/code block 28-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -1106,7 +1106,7 @@ hist(res_WT_EH$padj, breaks = 20, col = "grey", main = "DESeq2 p-value distribut
     xlab = "DESeq2 P-value", ylab = "Number of genes")
 ```
 
-![](_main_files/figure-html/code block 29-1.png)<!-- -->
+![]("_main_files/figure-html/code block 29-1.png")<!-- -->
 
 ###### Volacano-plot
 
@@ -1121,7 +1121,7 @@ grid.arrange(WT_EH_p1, WT_EH_p2, nrow = 2, ncol = 1)
 grid.rect(gp = gpar(fill = NA))
 ```
 
-![](_main_files/figure-html/code block 30-1.png)<!-- -->
+![]("_main_files/figure-html/code block 30-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -1137,7 +1137,7 @@ for (i in head(ord, nBestFeatures)) {
 }
 ```
 
-![](_main_files/figure-html/code block 31-1.png)<!-- -->![](_main_files/figure-html/code block 31-2.png)<!-- -->![](_main_files/figure-html/code block 31-3.png)<!-- -->![](_main_files/figure-html/code block 31-4.png)<!-- -->![](_main_files/figure-html/code block 31-5.png)<!-- -->![](_main_files/figure-html/code block 31-6.png)<!-- -->![](_main_files/figure-html/code block 31-7.png)<!-- -->![](_main_files/figure-html/code block 31-8.png)<!-- -->![](_main_files/figure-html/code block 31-9.png)<!-- -->![](_main_files/figure-html/code block 31-10.png)<!-- -->![](_main_files/figure-html/code block 31-11.png)<!-- -->![](_main_files/figure-html/code block 31-12.png)<!-- -->![](_main_files/figure-html/code block 31-13.png)<!-- -->![](_main_files/figure-html/code block 31-14.png)<!-- -->![](_main_files/figure-html/code block 31-15.png)<!-- -->![](_main_files/figure-html/code block 31-16.png)<!-- -->![](_main_files/figure-html/code block 31-17.png)<!-- -->![](_main_files/figure-html/code block 31-18.png)<!-- -->![](_main_files/figure-html/code block 31-19.png)<!-- -->![](_main_files/figure-html/code block 31-20.png)<!-- -->
+![]("_main_files/figure-html/code block 31-1.png")<!-- -->![]("_main_files/figure-html/code block 31-2.png")<!-- -->![]("_main_files/figure-html/code block 31-3.png")<!-- -->![]("_main_files/figure-html/code block 31-4.png")<!-- -->![]("_main_files/figure-html/code block 31-5.png")<!-- -->![]("_main_files/figure-html/code block 31-6.png")<!-- -->![]("_main_files/figure-html/code block 31-7.png")<!-- -->![]("_main_files/figure-html/code block 31-8.png")<!-- -->![]("_main_files/figure-html/code block 31-9.png")<!-- -->![]("_main_files/figure-html/code block 31-10.png")<!-- -->![]("_main_files/figure-html/code block 31-11.png")<!-- -->![]("_main_files/figure-html/code block 31-12.png")<!-- -->![]("_main_files/figure-html/code block 31-13.png")<!-- -->![]("_main_files/figure-html/code block 31-14.png")<!-- -->![]("_main_files/figure-html/code block 31-15.png")<!-- -->![]("_main_files/figure-html/code block 31-16.png")<!-- -->![]("_main_files/figure-html/code block 31-17.png")<!-- -->![]("_main_files/figure-html/code block 31-18.png")<!-- -->![]("_main_files/figure-html/code block 31-19.png")<!-- -->![]("_main_files/figure-html/code block 31-20.png")<!-- -->
 
 ##### Select genes based on FDR and make heatmap
 
@@ -1155,7 +1155,7 @@ for (i in head(ord, nBestFeatures)) {
             cexCol=0.7)
 ```
 
-![](_main_files/figure-html/code black 32-1.png)<!-- -->
+![]("_main_files/figure-html/code black 32-1.png")<!-- -->
 
 ```r
   invisible(dev.off())
@@ -1403,7 +1403,7 @@ plotMA(res_WT_H, xlim = xlim, ylim = ylim, main = "normal")
 plotMA(res_WT_H_ashr, xlim = xlim, ylim = ylim, main = "ashr")
 ```
 
-![](_main_files/figure-html/code block 34-1.png)<!-- -->
+![]("_main_files/figure-html/code block 34-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -1416,7 +1416,7 @@ hist(res_WT_H$padj, breaks = 20, col = "grey", main = "DESeq2 p-value distributi
     xlab = "DESeq2 P-value", ylab = "Number of genes")
 ```
 
-![](_main_files/figure-html/code block 35-1.png)<!-- -->
+![]("_main_files/figure-html/code block 35-1.png")<!-- -->
 
 ###### Volacano-plot
 
@@ -1431,7 +1431,7 @@ grid.arrange(WT_H_p1, WT_H_p2, nrow = 2, ncol = 1)
 grid.rect(gp = gpar(fill = NA))
 ```
 
-![](_main_files/figure-html/code block 36-1.png)<!-- -->
+![]("_main_files/figure-html/code block 36-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -1447,7 +1447,7 @@ for (i in head(ord, nBestFeatures)) {
 }
 ```
 
-![](_main_files/figure-html/code block 37-1.png)<!-- -->![](_main_files/figure-html/code block 37-2.png)<!-- -->![](_main_files/figure-html/code block 37-3.png)<!-- -->![](_main_files/figure-html/code block 37-4.png)<!-- -->![](_main_files/figure-html/code block 37-5.png)<!-- -->![](_main_files/figure-html/code block 37-6.png)<!-- -->![](_main_files/figure-html/code block 37-7.png)<!-- -->![](_main_files/figure-html/code block 37-8.png)<!-- -->![](_main_files/figure-html/code block 37-9.png)<!-- -->![](_main_files/figure-html/code block 37-10.png)<!-- -->![](_main_files/figure-html/code block 37-11.png)<!-- -->![](_main_files/figure-html/code block 37-12.png)<!-- -->![](_main_files/figure-html/code block 37-13.png)<!-- -->![](_main_files/figure-html/code block 37-14.png)<!-- -->![](_main_files/figure-html/code block 37-15.png)<!-- -->![](_main_files/figure-html/code block 37-16.png)<!-- -->![](_main_files/figure-html/code block 37-17.png)<!-- -->![](_main_files/figure-html/code block 37-18.png)<!-- -->![](_main_files/figure-html/code block 37-19.png)<!-- -->![](_main_files/figure-html/code block 37-20.png)<!-- -->
+![]("_main_files/figure-html/code block 37-1.png")<!-- -->![]("_main_files/figure-html/code block 37-2.png")<!-- -->![]("_main_files/figure-html/code block 37-3.png")<!-- -->![]("_main_files/figure-html/code block 37-4.png")<!-- -->![]("_main_files/figure-html/code block 37-5.png")<!-- -->![]("_main_files/figure-html/code block 37-6.png")<!-- -->![]("_main_files/figure-html/code block 37-7.png")<!-- -->![]("_main_files/figure-html/code block 37-8.png")<!-- -->![]("_main_files/figure-html/code block 37-9.png")<!-- -->![]("_main_files/figure-html/code block 37-10.png")<!-- -->![]("_main_files/figure-html/code block 37-11.png")<!-- -->![]("_main_files/figure-html/code block 37-12.png")<!-- -->![]("_main_files/figure-html/code block 37-13.png")<!-- -->![]("_main_files/figure-html/code block 37-14.png")<!-- -->![]("_main_files/figure-html/code block 37-15.png")<!-- -->![]("_main_files/figure-html/code block 37-16.png")<!-- -->![]("_main_files/figure-html/code block 37-17.png")<!-- -->![]("_main_files/figure-html/code block 37-18.png")<!-- -->![]("_main_files/figure-html/code block 37-19.png")<!-- -->![]("_main_files/figure-html/code block 37-20.png")<!-- -->
 
 ##### Select genes based on FDR and make heatmap
 
@@ -1465,7 +1465,7 @@ for (i in head(ord, nBestFeatures)) {
             cexCol=0.7)
 ```
 
-![](_main_files/figure-html/code black 38-1.png)<!-- -->
+![]("_main_files/figure-html/code black 38-1.png")<!-- -->
 
 ```r
   invisible(dev.off())
@@ -1678,7 +1678,7 @@ plotMA(res_EV_EH, xlim = xlim, ylim = ylim, main = "normal")
 plotMA(res_EV_EH_ashr, xlim = xlim, ylim = ylim, main = "ashr")
 ```
 
-![](_main_files/figure-html/code block 40-1.png)<!-- -->
+![]("_main_files/figure-html/code block 40-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -1691,7 +1691,7 @@ hist(res_EV_EH$padj, breaks = 20, col = "grey", main = "DESeq2 p-value distribut
     xlab = "DESeq2 P-value", ylab = "Number of genes")
 ```
 
-![](_main_files/figure-html/code block 41-1.png)<!-- -->
+![]("_main_files/figure-html/code block 41-1.png")<!-- -->
 
 ###### Volacano-plot
 
@@ -1706,7 +1706,7 @@ grid.arrange(EV_EH_p1, EV_EH_p2, nrow = 2, ncol = 1)
 grid.rect(gp = gpar(fill = NA))
 ```
 
-![](_main_files/figure-html/code block 42-1.png)<!-- -->
+![]("_main_files/figure-html/code block 42-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -1722,7 +1722,7 @@ for (i in head(ord, nBestFeatures)) {
 }
 ```
 
-![](_main_files/figure-html/code block 43-1.png)<!-- -->![](_main_files/figure-html/code block 43-2.png)<!-- -->![](_main_files/figure-html/code block 43-3.png)<!-- -->![](_main_files/figure-html/code block 43-4.png)<!-- -->![](_main_files/figure-html/code block 43-5.png)<!-- -->![](_main_files/figure-html/code block 43-6.png)<!-- -->![](_main_files/figure-html/code block 43-7.png)<!-- -->![](_main_files/figure-html/code block 43-8.png)<!-- -->![](_main_files/figure-html/code block 43-9.png)<!-- -->![](_main_files/figure-html/code block 43-10.png)<!-- -->![](_main_files/figure-html/code block 43-11.png)<!-- -->![](_main_files/figure-html/code block 43-12.png)<!-- -->![](_main_files/figure-html/code block 43-13.png)<!-- -->![](_main_files/figure-html/code block 43-14.png)<!-- -->![](_main_files/figure-html/code block 43-15.png)<!-- -->![](_main_files/figure-html/code block 43-16.png)<!-- -->![](_main_files/figure-html/code block 43-17.png)<!-- -->![](_main_files/figure-html/code block 43-18.png)<!-- -->![](_main_files/figure-html/code block 43-19.png)<!-- -->![](_main_files/figure-html/code block 43-20.png)<!-- -->
+![]("_main_files/figure-html/code block 43-1.png")<!-- -->![]("_main_files/figure-html/code block 43-2.png")<!-- -->![]("_main_files/figure-html/code block 43-3.png")<!-- -->![]("_main_files/figure-html/code block 43-4.png")<!-- -->![]("_main_files/figure-html/code block 43-5.png")<!-- -->![]("_main_files/figure-html/code block 43-6.png")<!-- -->![]("_main_files/figure-html/code block 43-7.png")<!-- -->![]("_main_files/figure-html/code block 43-8.png")<!-- -->![]("_main_files/figure-html/code block 43-9.png")<!-- -->![]("_main_files/figure-html/code block 43-10.png")<!-- -->![]("_main_files/figure-html/code block 43-11.png")<!-- -->![]("_main_files/figure-html/code block 43-12.png")<!-- -->![]("_main_files/figure-html/code block 43-13.png")<!-- -->![]("_main_files/figure-html/code block 43-14.png")<!-- -->![]("_main_files/figure-html/code block 43-15.png")<!-- -->![]("_main_files/figure-html/code block 43-16.png")<!-- -->![]("_main_files/figure-html/code block 43-17.png")<!-- -->![]("_main_files/figure-html/code block 43-18.png")<!-- -->![]("_main_files/figure-html/code block 43-19.png")<!-- -->![]("_main_files/figure-html/code block 43-20.png")<!-- -->
 
 ##### Select genes based on FDR and make heatmap
 
@@ -1740,7 +1740,7 @@ for (i in head(ord, nBestFeatures)) {
             cexCol=0.7)
 ```
 
-![](_main_files/figure-html/code black 44-1.png)<!-- -->
+![]("_main_files/figure-html/code black 44-1.png")<!-- -->
 
 ```r
   invisible(dev.off())
@@ -1997,7 +1997,7 @@ plotMA(res_EV_H, xlim = xlim, ylim = ylim, main = "normal")
 plotMA(res_EV_H_ashr, xlim = xlim, ylim = ylim, main = "ashr")
 ```
 
-![](_main_files/figure-html/code block 46-1.png)<!-- -->
+![]("_main_files/figure-html/code block 46-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -2010,7 +2010,7 @@ hist(res_EV_H$padj, breaks = 20, col = "grey", main = "DESeq2 p-value distributi
     xlab = "DESeq2 P-value", ylab = "Number of genes")
 ```
 
-![](_main_files/figure-html/code block 47-1.png)<!-- -->
+![]("_main_files/figure-html/code block 47-1.png")<!-- -->
 
 ###### Volacano-plot
 
@@ -2025,7 +2025,7 @@ grid.arrange(EV_H_p1, EV_H_p2, nrow = 2, ncol = 1)
 grid.rect(gp = gpar(fill = NA))
 ```
 
-![](_main_files/figure-html/code block 48-1.png)<!-- -->
+![]("_main_files/figure-html/code block 48-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -2041,7 +2041,7 @@ for (i in head(ord, nBestFeatures)) {
 }
 ```
 
-![](_main_files/figure-html/code block 49-1.png)<!-- -->![](_main_files/figure-html/code block 49-2.png)<!-- -->![](_main_files/figure-html/code block 49-3.png)<!-- -->![](_main_files/figure-html/code block 49-4.png)<!-- -->![](_main_files/figure-html/code block 49-5.png)<!-- -->![](_main_files/figure-html/code block 49-6.png)<!-- -->![](_main_files/figure-html/code block 49-7.png)<!-- -->![](_main_files/figure-html/code block 49-8.png)<!-- -->![](_main_files/figure-html/code block 49-9.png)<!-- -->![](_main_files/figure-html/code block 49-10.png)<!-- -->![](_main_files/figure-html/code block 49-11.png)<!-- -->![](_main_files/figure-html/code block 49-12.png)<!-- -->![](_main_files/figure-html/code block 49-13.png)<!-- -->![](_main_files/figure-html/code block 49-14.png)<!-- -->![](_main_files/figure-html/code block 49-15.png)<!-- -->![](_main_files/figure-html/code block 49-16.png)<!-- -->![](_main_files/figure-html/code block 49-17.png)<!-- -->![](_main_files/figure-html/code block 49-18.png)<!-- -->![](_main_files/figure-html/code block 49-19.png)<!-- -->![](_main_files/figure-html/code block 49-20.png)<!-- -->
+![]("_main_files/figure-html/code block 49-1.png")<!-- -->![]("_main_files/figure-html/code block 49-2.png")<!-- -->![]("_main_files/figure-html/code block 49-3.png")<!-- -->![]("_main_files/figure-html/code block 49-4.png")<!-- -->![]("_main_files/figure-html/code block 49-5.png")<!-- -->![]("_main_files/figure-html/code block 49-6.png")<!-- -->![]("_main_files/figure-html/code block 49-7.png")<!-- -->![]("_main_files/figure-html/code block 49-8.png")<!-- -->![]("_main_files/figure-html/code block 49-9.png")<!-- -->![]("_main_files/figure-html/code block 49-10.png")<!-- -->![]("_main_files/figure-html/code block 49-11.png")<!-- -->![]("_main_files/figure-html/code block 49-12.png")<!-- -->![]("_main_files/figure-html/code block 49-13.png")<!-- -->![]("_main_files/figure-html/code block 49-14.png")<!-- -->![]("_main_files/figure-html/code block 49-15.png")<!-- -->![]("_main_files/figure-html/code block 49-16.png")<!-- -->![]("_main_files/figure-html/code block 49-17.png")<!-- -->![]("_main_files/figure-html/code block 49-18.png")<!-- -->![]("_main_files/figure-html/code block 49-19.png")<!-- -->![]("_main_files/figure-html/code block 49-20.png")<!-- -->
 
 ##### Select genes based on FDR and make heatmap
 
@@ -2059,7 +2059,7 @@ for (i in head(ord, nBestFeatures)) {
             cexCol=0.7)
 ```
 
-![](_main_files/figure-html/code black 50-1.png)<!-- -->
+![]("_main_files/figure-html/code black 50-1.png")<!-- -->
 
 ```r
   invisible(dev.off())
@@ -2393,7 +2393,7 @@ plotMA(res_EH_H, xlim = xlim, ylim = ylim, main = "normal")
 plotMA(res_EH_H_ashr, xlim = xlim, ylim = ylim, main = "ashr")
 ```
 
-![](_main_files/figure-html/code block 52-1.png)<!-- -->
+![]("_main_files/figure-html/code block 52-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -2406,7 +2406,7 @@ hist(res_EH_H$padj, breaks = 20, col = "grey", main = "DESeq2 p-value distributi
     xlab = "DESeq2 P-value", ylab = "Number of genes")
 ```
 
-![](_main_files/figure-html/code block 53-1.png)<!-- -->
+![]("_main_files/figure-html/code block 53-1.png")<!-- -->
 
 ###### Volacano-plot
 
@@ -2421,7 +2421,7 @@ grid.arrange(EH_H_p1, EH_H_p2, nrow = 2, ncol = 1)
 grid.rect(gp = gpar(fill = NA))
 ```
 
-![](_main_files/figure-html/code block 54-1.png)<!-- -->
+![]("_main_files/figure-html/code block 54-1.png")<!-- -->
 
 ```r
 invisible(dev.off())
@@ -2437,7 +2437,7 @@ for (i in head(ord, nBestFeatures)) {
 }
 ```
 
-![](_main_files/figure-html/code block 55-1.png)<!-- -->![](_main_files/figure-html/code block 55-2.png)<!-- -->![](_main_files/figure-html/code block 55-3.png)<!-- -->![](_main_files/figure-html/code block 55-4.png)<!-- -->![](_main_files/figure-html/code block 55-5.png)<!-- -->![](_main_files/figure-html/code block 55-6.png)<!-- -->![](_main_files/figure-html/code block 55-7.png)<!-- -->![](_main_files/figure-html/code block 55-8.png)<!-- -->![](_main_files/figure-html/code block 55-9.png)<!-- -->![](_main_files/figure-html/code block 55-10.png)<!-- -->![](_main_files/figure-html/code block 55-11.png)<!-- -->![](_main_files/figure-html/code block 55-12.png)<!-- -->![](_main_files/figure-html/code block 55-13.png)<!-- -->![](_main_files/figure-html/code block 55-14.png)<!-- -->![](_main_files/figure-html/code block 55-15.png)<!-- -->![](_main_files/figure-html/code block 55-16.png)<!-- -->![](_main_files/figure-html/code block 55-17.png)<!-- -->![](_main_files/figure-html/code block 55-18.png)<!-- -->![](_main_files/figure-html/code block 55-19.png)<!-- -->![](_main_files/figure-html/code block 55-20.png)<!-- -->
+![]("_main_files/figure-html/code block 55-1.png")<!-- -->![]("_main_files/figure-html/code block 55-2.png")<!-- -->![]("_main_files/figure-html/code block 55-3.png")<!-- -->![]("_main_files/figure-html/code block 55-4.png")<!-- -->![]("_main_files/figure-html/code block 55-5.png")<!-- -->![]("_main_files/figure-html/code block 55-6.png")<!-- -->![]("_main_files/figure-html/code block 55-7.png")<!-- -->![]("_main_files/figure-html/code block 55-8.png")<!-- -->![]("_main_files/figure-html/code block 55-9.png")<!-- -->![]("_main_files/figure-html/code block 55-10.png")<!-- -->![]("_main_files/figure-html/code block 55-11.png")<!-- -->![]("_main_files/figure-html/code block 55-12.png")<!-- -->![]("_main_files/figure-html/code block 55-13.png")<!-- -->![]("_main_files/figure-html/code block 55-14.png")<!-- -->![]("_main_files/figure-html/code block 55-15.png")<!-- -->![]("_main_files/figure-html/code block 55-16.png")<!-- -->![]("_main_files/figure-html/code block 55-17.png")<!-- -->![]("_main_files/figure-html/code block 55-18.png")<!-- -->![]("_main_files/figure-html/code block 55-19.png")<!-- -->![]("_main_files/figure-html/code block 55-20.png")<!-- -->
 
 ##### Select genes based on FDR and make heatmap
 
@@ -2455,7 +2455,7 @@ for (i in head(ord, nBestFeatures)) {
             cexCol=0.7)
 ```
 
-![](_main_files/figure-html/code black 56-1.png)<!-- -->
+![]("_main_files/figure-html/code black 56-1.png")<!-- -->
 
 ```r
   invisible(dev.off())
