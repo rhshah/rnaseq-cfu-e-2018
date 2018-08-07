@@ -1,4 +1,4 @@
-name: "rna-cfu-e-august-2018"
+name: "rna-cfu-e-2018"
 output_dir: "."
 navbar:
   title: "Clustering and differential expression of CFU-e cells w.r.t different treatments"
