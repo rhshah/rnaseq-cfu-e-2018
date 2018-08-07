@@ -46,6 +46,7 @@
 
 
 
+<script src="libs/kePrint-0.0.1/kePrint.js"></script>
 
 
 <style type="text/css">
@@ -108,7 +109,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <li class="chapter" data-level="0.3.5" data-path=""><a href="#re-run-deseq2-normalization"><i class="fa fa-check"></i><b>0.3.5</b> Re-run DESeq2 &amp; Normalization</a></li>
 <li class="chapter" data-level="0.3.6" data-path=""><a href="#count-variance-is-related-to-mean"><i class="fa fa-check"></i><b>0.3.6</b> Count variance is related to mean</a></li>
 <li class="chapter" data-level="0.3.7" data-path=""><a href="#estimated-dispersion-for-each-gene"><i class="fa fa-check"></i><b>0.3.7</b> Estimated Dispersion for each gene</a></li>
-<li class="chapter" data-level="0.3.8" data-path=""><a href="#pca-amd-heatmap-on-all-samples-using-reguralized-log-transformation"><i class="fa fa-check"></i><b>0.3.8</b> PCA amd heatmap on all samples using reguralized log transformation</a></li>
+<li class="chapter" data-level="0.3.8" data-path=""><a href="#pca-and-heatmap-on-all-samples-using-reguralized-log-transformation"><i class="fa fa-check"></i><b>0.3.8</b> PCA and heatmap on all samples using reguralized log transformation</a></li>
 <li class="chapter" data-level="0.3.9" data-path=""><a href="#perform-differential-expression-call"><i class="fa fa-check"></i><b>0.3.9</b> Perform differential expression call</a></li>
 </ul></li>
 </ul>
@@ -155,7 +156,7 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 </ul></li>
 <li><a href="#count-variance-is-related-to-mean">Count variance is related to mean</a></li>
 <li><a href="#estimated-dispersion-for-each-gene">Estimated Dispersion for each gene</a></li>
-<li><a href="#pca-amd-heatmap-on-all-samples-using-reguralized-log-transformation">PCA amd heatmap on all samples using reguralized log transformation</a>
+<li><a href="#pca-and-heatmap-on-all-samples-using-reguralized-log-transformation">PCA and heatmap on all samples using reguralized log transformation</a>
 <ul>
 <li><a href="#pca-using-rlog">PCA using rlog</a></li>
 <li><a href="#heatmap-of-count-matrix-for-first-50-genes">Heatmap of count matrix for first 50 genes</a></li>
@@ -188,7 +189,8 @@ code > span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Inf
 <span class="kw">library</span>(<span class="st">&quot;affy&quot;</span>)
 <span class="kw">library</span>(<span class="st">&quot;reshape2&quot;</span>)
 <span class="kw">library</span>(<span class="st">&quot;gProfileR&quot;</span>)
-<span class="kw">library</span>(<span class="st">&quot;ComplexHeatmap&quot;</span>)</code></pre></div>
+<span class="kw">library</span>(<span class="st">&quot;ComplexHeatmap&quot;</span>)
+<span class="kw">library</span>(<span class="st">&quot;kableExtra&quot;</span>)</code></pre></div>
 <hr />
 </div>
 <div id="summary-of-experiment" class="section level2">
@@ -245,7 +247,7 @@ ddsHTSeq<span class="op">$</span>condition.experiment &lt;-<span class="st"> </s
 <div id="make-counts-table-to-explore-that-data" class="section level3">
 <h3><span class="header-section-number">0.3.2</span> Make counts table to explore that data</h3>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">count.table &lt;-<span class="st"> </span><span class="kw">counts</span>(dds)
-count.table &lt;-<span class="st"> </span>count.table[<span class="op">-</span><span class="kw">c</span>((<span class="kw">grep</span>(<span class="st">&quot;^HIST|RNA|^RP11&quot;</span>, 
+count.table &lt;-<span class="st"> </span>count.table[<span class="op">-</span><span class="kw">c</span>((<span class="kw">grep</span>(<span class="st">&quot;^HIST|RNA|^RP11|^LINC|^RPL|^RNVU&quot;</span>, 
     <span class="kw">rownames</span>(count.table)))), ]
 stats.per.sample &lt;-<span class="st"> </span><span class="kw">data.frame</span>(<span class="kw">t</span>(<span class="kw">do.call</span>(cbind, 
     <span class="kw">lapply</span>(count.table, summary))))
@@ -264,187 +266,498 @@ stats.per.sample<span class="op">$</span>zeros &lt;-<span class="st"> </span><sp
 stats.per.sample<span class="op">$</span>percent.zeros &lt;-<span class="st"> </span><span class="dv">100</span> <span class="op">*</span><span class="st"> </span>
 <span class="st">    </span>stats.per.sample<span class="op">$</span>zeros<span class="op">/</span><span class="kw">nrow</span>(count.table)
 <span class="kw">kable</span>(stats.per.sample[<span class="kw">sample</span>(<span class="dv">1</span><span class="op">:</span><span class="kw">ncol</span>(count.table), 
-    <span class="dt">size =</span> <span class="dv">10</span>), ], <span class="dt">caption =</span> <span class="st">&quot;**Table: statistics per sample. ** We only display a random selection of 10 samples. &quot;</span>)</code></pre></div>
-<table>
-<caption>(#tab:code block 4)<strong>Table: statistics per sample. </strong> We only display a random selection of 10 samples.</caption>
+    <span class="dt">size =</span> <span class="dv">10</span>), ], <span class="dt">caption =</span> <span class="st">&quot;**Table: statistics per sample. ** We only display a random selection of 10 samples. &quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">    </span><span class="kw">kable_styling</span>(<span class="dt">bootstrap_options =</span> <span class="kw">c</span>(<span class="st">&quot;striped&quot;</span>, 
+        <span class="st">&quot;hover&quot;</span>, <span class="st">&quot;condensed&quot;</span>, <span class="st">&quot;responsive&quot;</span>))</code></pre></div>
+<table class="table table-striped table-hover table-condensed table-responsive" style="margin-left: auto; margin-right: auto;">
+<caption>
+(#tab:code block 4)<strong>Table: statistics per sample. </strong> We only display a random selection of 10 samples.
+</caption>
 <thead>
-<tr class="header">
-<th></th>
-<th align="right">Min.</th>
-<th align="right">X1st.Qu.</th>
-<th align="right">Median</th>
-<th align="right">Mean</th>
-<th align="right">X3rd.Qu.</th>
-<th align="right">Max.</th>
-<th align="right">libsum</th>
-<th align="right">perc05</th>
-<th align="right">perc10</th>
-<th align="right">perc90</th>
-<th align="right">perc95</th>
-<th align="right">zeros</th>
-<th align="right">percent.zeros</th>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+Min.
+</th>
+<th style="text-align:right;">
+X1st.Qu.
+</th>
+<th style="text-align:right;">
+Median
+</th>
+<th style="text-align:right;">
+Mean
+</th>
+<th style="text-align:right;">
+X3rd.Qu.
+</th>
+<th style="text-align:right;">
+Max.
+</th>
+<th style="text-align:right;">
+libsum
+</th>
+<th style="text-align:right;">
+perc05
+</th>
+<th style="text-align:right;">
+perc10
+</th>
+<th style="text-align:right;">
+perc90
+</th>
+<th style="text-align:right;">
+perc95
+</th>
+<th style="text-align:right;">
+zeros
+</th>
+<th style="text-align:right;">
+percent.zeros
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td>11</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">16025018</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">864.0</td>
-<td align="right">1727.2</td>
-<td align="right">24354</td>
-<td align="right">54.92929</td>
+<tr>
+<td style="text-align:left;">
+11
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+15453771
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+884
+</td>
+<td style="text-align:right;">
+1739.5
+</td>
+<td style="text-align:right;">
+23465
+</td>
+<td style="text-align:right;">
+54.47981
+</td>
 </tr>
-<tr class="even">
-<td>3</td>
-<td align="right">5</td>
-<td align="right">5</td>
-<td align="right">5</td>
-<td align="right">5</td>
-<td align="right">5</td>
-<td align="right">5</td>
-<td align="right">15796424</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">800.4</td>
-<td align="right">1621.0</td>
-<td align="right">24715</td>
-<td align="right">55.74351</td>
+<tr>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+15188212
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+818
+</td>
+<td style="text-align:right;">
+1632.0
+</td>
+<td style="text-align:right;">
+23824
+</td>
+<td style="text-align:right;">
+55.31332
+</td>
 </tr>
-<tr class="odd">
-<td>4</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">15273891</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">774.0</td>
-<td align="right">1569.2</td>
-<td align="right">24872</td>
-<td align="right">56.09762</td>
+<tr>
+<td style="text-align:left;">
+4
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+14681229
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+793
+</td>
+<td style="text-align:right;">
+1579.0
+</td>
+<td style="text-align:right;">
+23971
+</td>
+<td style="text-align:right;">
+55.65462
+</td>
 </tr>
-<tr class="even">
-<td>6</td>
-<td align="right">11</td>
-<td align="right">11</td>
-<td align="right">11</td>
-<td align="right">11</td>
-<td align="right">11</td>
-<td align="right">11</td>
-<td align="right">13073035</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">645.0</td>
-<td align="right">1292.0</td>
-<td align="right">24544</td>
-<td align="right">55.35783</td>
+<tr>
+<td style="text-align:left;">
+6
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+12569247
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+661
+</td>
+<td style="text-align:right;">
+1301.0
+</td>
+<td style="text-align:right;">
+23649
+</td>
+<td style="text-align:right;">
+54.90701
+</td>
 </tr>
-<tr class="odd">
-<td>8</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">16006088</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">804.0</td>
-<td align="right">1620.0</td>
-<td align="right">24365</td>
-<td align="right">54.95410</td>
+<tr>
+<td style="text-align:left;">
+8
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+15417872
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+824
+</td>
+<td style="text-align:right;">
+1626.5
+</td>
+<td style="text-align:right;">
+23469
+</td>
+<td style="text-align:right;">
+54.48910
+</td>
 </tr>
-<tr class="even">
-<td>2</td>
-<td align="right">3</td>
-<td align="right">3</td>
-<td align="right">3</td>
-<td align="right">3</td>
-<td align="right">3</td>
-<td align="right">3</td>
-<td align="right">15509458</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">793.0</td>
-<td align="right">1603.0</td>
-<td align="right">24712</td>
-<td align="right">55.73674</td>
+<tr>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+14920843
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+812
+</td>
+<td style="text-align:right;">
+1617.0
+</td>
+<td style="text-align:right;">
+23813
+</td>
+<td style="text-align:right;">
+55.28778
+</td>
 </tr>
-<tr class="odd">
-<td>9</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">14905408</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">789.0</td>
-<td align="right">1569.0</td>
-<td align="right">24223</td>
-<td align="right">54.63383</td>
+<tr>
+<td style="text-align:left;">
+9
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+14310464
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+808
+</td>
+<td style="text-align:right;">
+1580.0
+</td>
+<td style="text-align:right;">
+23343
+</td>
+<td style="text-align:right;">
+54.19656
+</td>
 </tr>
-<tr class="even">
-<td>5</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">1</td>
-<td align="right">16355877</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">811.4</td>
-<td align="right">1628.2</td>
-<td align="right">24136</td>
-<td align="right">54.43760</td>
+<tr>
+<td style="text-align:left;">
+5
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+15712110
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+828
+</td>
+<td style="text-align:right;">
+1648.0
+</td>
+<td style="text-align:right;">
+23228
+</td>
+<td style="text-align:right;">
+53.92956
+</td>
 </tr>
-<tr class="odd">
-<td>12</td>
-<td align="right">882</td>
-<td align="right">882</td>
-<td align="right">882</td>
-<td align="right">882</td>
-<td align="right">882</td>
-<td align="right">882</td>
-<td align="right">13745586</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">728.0</td>
-<td align="right">1477.0</td>
-<td align="right">24754</td>
-<td align="right">55.83147</td>
+<tr>
+<td style="text-align:left;">
+12
+</td>
+<td style="text-align:right;">
+882
+</td>
+<td style="text-align:right;">
+882
+</td>
+<td style="text-align:right;">
+882
+</td>
+<td style="text-align:right;">
+882
+</td>
+<td style="text-align:right;">
+882
+</td>
+<td style="text-align:right;">
+882
+</td>
+<td style="text-align:right;">
+13250203
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+749
+</td>
+<td style="text-align:right;">
+1487.5
+</td>
+<td style="text-align:right;">
+23863
+</td>
+<td style="text-align:right;">
+55.40387
+</td>
 </tr>
-<tr class="even">
-<td>7</td>
-<td align="right">33</td>
-<td align="right">33</td>
-<td align="right">33</td>
-<td align="right">33</td>
-<td align="right">33</td>
-<td align="right">33</td>
-<td align="right">16044909</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">801.0</td>
-<td align="right">1620.2</td>
-<td align="right">24460</td>
-<td align="right">55.16837</td>
+<tr>
+<td style="text-align:left;">
+7
+</td>
+<td style="text-align:right;">
+33
+</td>
+<td style="text-align:right;">
+33
+</td>
+<td style="text-align:right;">
+33
+</td>
+<td style="text-align:right;">
+33
+</td>
+<td style="text-align:right;">
+33
+</td>
+<td style="text-align:right;">
+33
+</td>
+<td style="text-align:right;">
+15438596
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+819
+</td>
+<td style="text-align:right;">
+1631.0
+</td>
+<td style="text-align:right;">
+23545
+</td>
+<td style="text-align:right;">
+54.66555
+</td>
 </tr>
 </tbody>
 </table>
@@ -610,179 +923,469 @@ norm.counts.stats &lt;-<span class="st"> </span><span class="kw">data.frame</spa
         <span class="dv">2</span>, quantile, <span class="fl">0.1</span>), <span class="dt">perc90 =</span> <span class="kw">apply</span>(norm.counts, 
         <span class="dv">2</span>, quantile, <span class="fl">0.9</span>), <span class="dt">perc95 =</span> <span class="kw">apply</span>(norm.counts, 
         <span class="dv">2</span>, quantile, <span class="fl">0.95</span>))
-<span class="kw">kable</span>(norm.counts.stats)</code></pre></div>
-<table>
+<span class="kw">kable</span>(norm.counts.stats, <span class="dt">caption =</span> <span class="st">&quot;**Table: statistics for count. ** &quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">    </span><span class="kw">kable_styling</span>(<span class="dt">bootstrap_options =</span> <span class="kw">c</span>(<span class="st">&quot;striped&quot;</span>, 
+        <span class="st">&quot;hover&quot;</span>, <span class="st">&quot;condensed&quot;</span>, <span class="st">&quot;responsive&quot;</span>))</code></pre></div>
+<table class="table table-striped table-hover table-condensed table-responsive" style="margin-left: auto; margin-right: auto;">
+<caption>
+(#tab:code block 16)<strong>Table: statistics for count. </strong>
+</caption>
 <thead>
-<tr class="header">
-<th></th>
-<th align="right">min</th>
-<th align="right">mean</th>
-<th align="right">median</th>
-<th align="right">max</th>
-<th align="right">zeros</th>
-<th align="right">percent.zeros</th>
-<th align="right">perc05</th>
-<th align="right">perc10</th>
-<th align="right">perc90</th>
-<th align="right">perc95</th>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:right;">
+min
+</th>
+<th style="text-align:right;">
+mean
+</th>
+<th style="text-align:right;">
+median
+</th>
+<th style="text-align:right;">
+max
+</th>
+<th style="text-align:right;">
+zeros
+</th>
+<th style="text-align:right;">
+percent.zeros
+</th>
+<th style="text-align:right;">
+perc05
+</th>
+<th style="text-align:right;">
+perc10
+</th>
+<th style="text-align:right;">
+perc90
+</th>
+<th style="text-align:right;">
+perc95
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td>S01</td>
-<td align="right">0</td>
-<td align="right">573.3060</td>
-<td align="right">10.42074</td>
-<td align="right">302131.5</td>
-<td align="right">6882</td>
-<td align="right">26.11269</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1358.864</td>
-<td align="right">2394.581</td>
+<tr>
+<td style="text-align:left;">
+S01
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+563.8231
+</td>
+<td style="text-align:right;">
+11.46740
+</td>
+<td style="text-align:right;">
+302252.5
+</td>
+<td style="text-align:right;">
+6643
+</td>
+<td style="text-align:right;">
+25.80106
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1365.663
+</td>
+<td style="text-align:right;">
+2374.794
+</td>
 </tr>
-<tr class="even">
-<td>S02</td>
-<td align="right">0</td>
-<td align="right">568.1465</td>
-<td align="right">10.61987</td>
-<td align="right">302188.5</td>
-<td align="right">6730</td>
-<td align="right">25.53595</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1333.856</td>
-<td align="right">2346.992</td>
+<tr>
+<td style="text-align:left;">
+S02
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+559.4646
+</td>
+<td style="text-align:right;">
+11.58476
+</td>
+<td style="text-align:right;">
+302174.0
+</td>
+<td style="text-align:right;">
+6489
+</td>
+<td style="text-align:right;">
+25.20294
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1339.392
+</td>
+<td style="text-align:right;">
+2330.178
+</td>
 </tr>
-<tr class="odd">
-<td>S03</td>
-<td align="right">0</td>
-<td align="right">579.9790</td>
-<td align="right">10.64411</td>
-<td align="right">321006.9</td>
-<td align="right">6733</td>
-<td align="right">25.54733</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1346.963</td>
-<td align="right">2362.604</td>
+<tr>
+<td style="text-align:left;">
+S03
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+570.9703
+</td>
+<td style="text-align:right;">
+11.61488
+</td>
+<td style="text-align:right;">
+321093.4
+</td>
+<td style="text-align:right;">
+6500
+</td>
+<td style="text-align:right;">
+25.24566
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1355.457
+</td>
+<td style="text-align:right;">
+2351.433
+</td>
 </tr>
-<tr class="even">
-<td>S04</td>
-<td align="right">0</td>
-<td align="right">581.0388</td>
-<td align="right">10.02579</td>
-<td align="right">350783.2</td>
-<td align="right">6890</td>
-<td align="right">26.14305</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1359.497</td>
-<td align="right">2363.379</td>
+<tr>
+<td style="text-align:left;">
+S04
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+571.9695
+</td>
+<td style="text-align:right;">
+11.03392
+</td>
+<td style="text-align:right;">
+350959.9
+</td>
+<td style="text-align:right;">
+6647
+</td>
+<td style="text-align:right;">
+25.81660
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1367.203
+</td>
+<td style="text-align:right;">
+2347.918
+</td>
 </tr>
-<tr class="odd">
-<td>S05</td>
-<td align="right">0</td>
-<td align="right">572.3780</td>
-<td align="right">11.98990</td>
-<td align="right">374807.9</td>
-<td align="right">6154</td>
-<td align="right">23.35041</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1294.909</td>
-<td align="right">2275.314</td>
+<tr>
+<td style="text-align:left;">
+S05
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+563.0195
+</td>
+<td style="text-align:right;">
+12.91646
+</td>
+<td style="text-align:right;">
+374931.7
+</td>
+<td style="text-align:right;">
+5904
+</td>
+<td style="text-align:right;">
+22.93083
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1302.164
+</td>
+<td style="text-align:right;">
+2257.336
+</td>
 </tr>
-<tr class="even">
-<td>S06</td>
-<td align="right">0</td>
-<td align="right">568.7111</td>
-<td align="right">12.61162</td>
-<td align="right">383578.0</td>
-<td align="right">6562</td>
-<td align="right">24.89850</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1278.360</td>
-<td align="right">2241.773</td>
+<tr>
+<td style="text-align:left;">
+S06
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+560.1683
+</td>
+<td style="text-align:right;">
+13.76947
+</td>
+<td style="text-align:right;">
+383893.9
+</td>
+<td style="text-align:right;">
+6325
+</td>
+<td style="text-align:right;">
+24.56597
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1289.740
+</td>
+<td style="text-align:right;">
+2226.867
+</td>
 </tr>
-<tr class="odd">
-<td>S07</td>
-<td align="right">0</td>
-<td align="right">579.0621</td>
-<td align="right">12.36500</td>
-<td align="right">380738.5</td>
-<td align="right">6478</td>
-<td align="right">24.57978</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1304.032</td>
-<td align="right">2315.395</td>
+<tr>
+<td style="text-align:left;">
+S07
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+570.1387
+</td>
+<td style="text-align:right;">
+13.31151
+</td>
+<td style="text-align:right;">
+380605.6
+</td>
+<td style="text-align:right;">
+6221
+</td>
+<td style="text-align:right;">
+24.16204
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1311.945
+</td>
+<td style="text-align:right;">
+2298.233
+</td>
 </tr>
-<tr class="even">
-<td>S08</td>
-<td align="right">0</td>
-<td align="right">584.3166</td>
-<td align="right">11.54536</td>
-<td align="right">366004.1</td>
-<td align="right">6383</td>
-<td align="right">24.21931</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1328.870</td>
-<td align="right">2354.868</td>
+<tr>
+<td style="text-align:left;">
+S08
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+576.0588
+</td>
+<td style="text-align:right;">
+12.50583
+</td>
+<td style="text-align:right;">
+365956.1
+</td>
+<td style="text-align:right;">
+6145
+</td>
+<td style="text-align:right;">
+23.86686
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1336.584
+</td>
+<td style="text-align:right;">
+2334.453
+</td>
 </tr>
-<tr class="odd">
-<td>S09</td>
-<td align="right">0</td>
-<td align="right">543.7968</td>
-<td align="right">12.49969</td>
-<td align="right">260979.1</td>
-<td align="right">6241</td>
-<td align="right">23.68052</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1306.698</td>
-<td align="right">2255.713</td>
+<tr>
+<td style="text-align:left;">
+S09
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+534.5886
+</td>
+<td style="text-align:right;">
+13.46544
+</td>
+<td style="text-align:right;">
+261061.3
+</td>
+<td style="text-align:right;">
+6019
+</td>
+<td style="text-align:right;">
+23.37748
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1314.227
+</td>
+<td style="text-align:right;">
+2242.669
+</td>
 </tr>
-<tr class="even">
-<td>S10</td>
-<td align="right">0</td>
-<td align="right">560.4016</td>
-<td align="right">11.20687</td>
-<td align="right">265525.5</td>
-<td align="right">6653</td>
-<td align="right">25.24379</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1335.656</td>
-<td align="right">2337.041</td>
+<tr>
+<td style="text-align:left;">
+S10
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+551.5089
+</td>
+<td style="text-align:right;">
+12.22801
+</td>
+<td style="text-align:right;">
+265576.0
+</td>
+<td style="text-align:right;">
+6403
+</td>
+<td style="text-align:right;">
+24.86892
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1341.005
+</td>
+<td style="text-align:right;">
+2321.997
+</td>
 </tr>
-<tr class="odd">
-<td>S11</td>
-<td align="right">0</td>
-<td align="right">555.9397</td>
-<td align="right">10.97169</td>
-<td align="right">230312.2</td>
-<td align="right">6372</td>
-<td align="right">24.17758</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1360.489</td>
-<td align="right">2350.684</td>
+<tr>
+<td style="text-align:left;">
+S11
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+548.5404
+</td>
+<td style="text-align:right;">
+11.88076
+</td>
+<td style="text-align:right;">
+230210.7
+</td>
+<td style="text-align:right;">
+6141
+</td>
+<td style="text-align:right;">
+23.85132
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1367.567
+</td>
+<td style="text-align:right;">
+2335.665
+</td>
 </tr>
-<tr class="even">
-<td>S12</td>
-<td align="right">0</td>
-<td align="right">567.6020</td>
-<td align="right">10.88288</td>
-<td align="right">264424.5</td>
-<td align="right">6772</td>
-<td align="right">25.69531</td>
-<td align="right">0</td>
-<td align="right">0</td>
-<td align="right">1381.255</td>
-<td align="right">2399.239</td>
+<tr>
+<td style="text-align:left;">
+S12
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+559.3352
+</td>
+<td style="text-align:right;">
+11.95553
+</td>
+<td style="text-align:right;">
+264079.3
+</td>
+<td style="text-align:right;">
+6539
+</td>
+<td style="text-align:right;">
+25.39713
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+0
+</td>
+<td style="text-align:right;">
+1390.102
+</td>
+<td style="text-align:right;">
+2375.673
+</td>
 </tr>
 </tbody>
 </table>
@@ -813,8 +1416,8 @@ dds.disp &lt;-<span class="st"> </span><span class="kw">estimateDispersions</spa
 <p><img src="_main_files/figure-html/code%20block%2017-1.png" width="672" /></p>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="kw">invisible</span>(<span class="kw">dev.off</span>())</code></pre></div>
 </div>
-<div id="pca-amd-heatmap-on-all-samples-using-reguralized-log-transformation" class="section level3 tabset tabset-fade tabset-pills">
-<h3><span class="header-section-number">0.3.8</span> PCA amd heatmap on all samples using reguralized log transformation</h3>
+<div id="pca-and-heatmap-on-all-samples-using-reguralized-log-transformation" class="section level3 tabset tabset-fade tabset-pills">
+<h3><span class="header-section-number">0.3.8</span> PCA and heatmap on all samples using reguralized log transformation</h3>
 <ul>
 <li>Transforms the count data to the log2 scale in a way which minimizes differences between samples for rows with small counts, and which normalizes with respect to library size.</li>
 </ul>
@@ -917,7 +1520,9 @@ plotCounts_gg &lt;-<span class="st"> </span><span class="cf">function</span>(i, 
 <span class="st">        </span><span class="kw">ggtitle</span>(main) <span class="op">+</span><span class="st"> </span><span class="kw">coord_trans</span>(<span class="dt">y =</span> <span class="st">&quot;log2&quot;</span>) <span class="op">+</span><span class="st"> </span>
 <span class="st">        </span><span class="kw">scale_x_discrete</span>(<span class="dt">limits =</span> <span class="kw">c</span>(<span class="st">&quot;WT&quot;</span>, 
             <span class="st">&quot;EV&quot;</span>, <span class="st">&quot;EH&quot;</span>, <span class="st">&quot;H&quot;</span>))
-}</code></pre></div>
+}
+<span class="co"># for Kable</span>
+rowlim =<span class="st"> </span><span class="dv">10</span></code></pre></div>
 </div>
 <div id="untreated-wt-vs-epo-with-vehicle-ev" class="section level4">
 <h4><span class="header-section-number">0.3.9.2</span> Untreated (WT) vs EPO with Vehicle (EV)</h4>
@@ -1004,13 +1609,23 @@ induced.sign &lt;-<span class="st"> </span><span class="kw">rownames</span>(res_
         <span class="dt">organism =</span> <span class="st">&quot;hsapiens&quot;</span>)
     term.induced &lt;-<span class="st"> </span>term.induced[<span class="kw">order</span>(term.induced<span class="op">$</span>p.value), 
         ]
+    <span class="kw">na.omit</span>(term.induced)
     <span class="co"># term.induced$p.value</span>
-    <span class="kw">kable</span>(term.induced[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, <span class="kw">c</span>(<span class="st">&quot;term.name&quot;</span>, 
-        <span class="st">&quot;term.size&quot;</span>, <span class="st">&quot;query.size&quot;</span>, 
-        <span class="st">&quot;overlap.size&quot;</span>, <span class="st">&quot;recall&quot;</span>, 
-        <span class="st">&quot;precision&quot;</span>, <span class="st">&quot;p.value&quot;</span>, 
-        <span class="st">&quot;intersection&quot;</span>)], <span class="dt">format.args =</span> <span class="kw">c</span>(<span class="dt">engeneer =</span> <span class="ot">TRUE</span>, 
-        <span class="dt">digits =</span> <span class="dv">3</span>), <span class="dt">caption =</span> <span class="st">&quot;**Table: induced gene functional analysis wit gProfileR. ** &quot;</span>)
+    <span class="cf">if</span> (<span class="kw">nrow</span>(term.induced) <span class="op">&gt;=</span><span class="st"> </span><span class="dv">10</span>) {
+        rowlim =<span class="st"> </span><span class="dv">10</span>
+    } <span class="cf">else</span> {
+        rowlim =<span class="st"> </span><span class="kw">nrow</span>(term.induced)
+    }
+    <span class="kw">kable</span>(term.induced[<span class="dv">1</span><span class="op">:</span>rowlim, 
+        <span class="kw">c</span>(<span class="st">&quot;term.name&quot;</span>, <span class="st">&quot;term.size&quot;</span>, 
+            <span class="st">&quot;query.size&quot;</span>, <span class="st">&quot;overlap.size&quot;</span>, 
+            <span class="st">&quot;recall&quot;</span>, <span class="st">&quot;precision&quot;</span>, 
+            <span class="st">&quot;p.value&quot;</span>, <span class="st">&quot;intersection&quot;</span>)], 
+        <span class="dt">format.args =</span> <span class="kw">c</span>(<span class="dt">engeneer =</span> <span class="ot">TRUE</span>, 
+            <span class="dt">digits =</span> <span class="dv">3</span>), <span class="dt">caption =</span> <span class="st">&quot;**Table: induced gene functional analysis wit gProfileR. ** &quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">        </span><span class="kw">kable_styling</span>(<span class="dt">bootstrap_options =</span> <span class="kw">c</span>(<span class="st">&quot;striped&quot;</span>, 
+            <span class="st">&quot;hover&quot;</span>, <span class="st">&quot;condensed&quot;</span>, 
+            <span class="st">&quot;responsive&quot;</span>))
 }</code></pre></div>
 <pre><code>## No genes found that have induced expression</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">repressed.sign &lt;-<span class="st"> </span><span class="kw">rownames</span>(res_WT_EV.df)[res_WT_EV.df<span class="op">$</span>log2FoldChange <span class="op">&lt;=</span><span class="st"> </span>
@@ -1023,139 +1638,348 @@ induced.sign &lt;-<span class="st"> </span><span class="kw">rownames</span>(res_
         <span class="dt">organism =</span> <span class="st">&quot;hsapiens&quot;</span>)
     term.repressed &lt;-<span class="st"> </span>term.repressed[<span class="kw">order</span>(term.repressed<span class="op">$</span>p.value), 
         ]
-    <span class="kw">kable</span>(term.repressed[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, 
+    <span class="kw">na.omit</span>(term.repressed)
+    <span class="cf">if</span> (<span class="kw">nrow</span>(term.repressed) <span class="op">&gt;=</span><span class="st"> </span>
+<span class="st">        </span><span class="dv">10</span>) {
+        rowlim =<span class="st"> </span><span class="dv">10</span>
+    } <span class="cf">else</span> {
+        rowlim =<span class="st"> </span><span class="kw">nrow</span>(term.repressed)
+    }
+    <span class="kw">kable</span>(term.repressed[<span class="dv">1</span><span class="op">:</span>rowlim, 
         <span class="kw">c</span>(<span class="st">&quot;term.name&quot;</span>, <span class="st">&quot;term.size&quot;</span>, 
             <span class="st">&quot;query.size&quot;</span>, <span class="st">&quot;overlap.size&quot;</span>, 
             <span class="st">&quot;recall&quot;</span>, <span class="st">&quot;precision&quot;</span>, 
             <span class="st">&quot;p.value&quot;</span>, <span class="st">&quot;intersection&quot;</span>)], 
         <span class="dt">format.args =</span> <span class="kw">c</span>(<span class="dt">engeneer =</span> <span class="ot">TRUE</span>, 
-            <span class="dt">digits =</span> <span class="dv">3</span>), <span class="dt">caption =</span> <span class="st">&quot;**Table: repressed genes functional analysis with gProfileR. ** &quot;</span>)
+            <span class="dt">digits =</span> <span class="dv">3</span>), <span class="dt">caption =</span> <span class="st">&quot;**Table: repressed genes functional analysis with gProfileR. ** &quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">        </span><span class="kw">kable_styling</span>(<span class="dt">bootstrap_options =</span> <span class="kw">c</span>(<span class="st">&quot;striped&quot;</span>, 
+            <span class="st">&quot;hover&quot;</span>, <span class="st">&quot;condensed&quot;</span>, 
+            <span class="st">&quot;responsive&quot;</span>))
 }</code></pre></div>
-<table>
-<caption>(#tab:code block 27)<strong>Table: repressed genes functional analysis with gProfileR. </strong></caption>
+<table class="table table-striped table-hover table-condensed table-responsive" style="margin-left: auto; margin-right: auto;">
+<caption>
+(#tab:code block 27)<strong>Table: repressed genes functional analysis with gProfileR. </strong>
+</caption>
 <thead>
-<tr class="header">
-<th></th>
-<th align="left">term.name</th>
-<th align="right">term.size</th>
-<th align="right">query.size</th>
-<th align="right">overlap.size</th>
-<th align="right">recall</th>
-<th align="right">precision</th>
-<th align="right">p.value</th>
-<th align="left">intersection</th>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+term.name
+</th>
+<th style="text-align:right;">
+term.size
+</th>
+<th style="text-align:right;">
+query.size
+</th>
+<th style="text-align:right;">
+overlap.size
+</th>
+<th style="text-align:right;">
+recall
+</th>
+<th style="text-align:right;">
+precision
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+<th style="text-align:left;">
+intersection
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td>13</td>
-<td align="left">Jak-STAT signaling pathway</td>
-<td align="right">162</td>
-<td align="right">22</td>
-<td align="right">8</td>
-<td align="right">0.049</td>
-<td align="right">0.364</td>
-<td align="right">7.00e-07</td>
-<td align="left">IL4R,OSM,CISH,SOCS2,CDKN1A,MYC,PIM1,SOCS3</td>
+<tr>
+<td style="text-align:left;">
+13
+</td>
+<td style="text-align:left;">
+Jak-STAT signaling pathway
+</td>
+<td style="text-align:right;">
+162
+</td>
+<td style="text-align:right;">
+22
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+0.049
+</td>
+<td style="text-align:right;">
+0.364
+</td>
+<td style="text-align:right;">
+7.00e-07
+</td>
+<td style="text-align:left;">
+IL4R,OSM,CISH,SOCS2,CDKN1A,MYC,PIM1,SOCS3
+</td>
 </tr>
-<tr class="even">
-<td>17</td>
-<td align="left">Signaling by Interleukins</td>
-<td align="right">463</td>
-<td align="right">21</td>
-<td align="right">10</td>
-<td align="right">0.022</td>
-<td align="right">0.476</td>
-<td align="right">1.60e-06</td>
-<td align="left">IL4R,OSM,CISH,SOCS2,CD80,CDKN1A,MYC,PIM1,SOCS3,IRS2</td>
+<tr>
+<td style="text-align:left;">
+18
+</td>
+<td style="text-align:left;">
+Signaling by Interleukins
+</td>
+<td style="text-align:right;">
+463
+</td>
+<td style="text-align:right;">
+21
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+0.022
+</td>
+<td style="text-align:right;">
+0.476
+</td>
+<td style="text-align:right;">
+1.60e-06
+</td>
+<td style="text-align:left;">
+IL4R,OSM,CISH,SOCS2,CD80,CDKN1A,MYC,PIM1,SOCS3,IRS2
+</td>
 </tr>
-<tr class="odd">
-<td>15</td>
-<td align="left">Cytokine Signaling in Immune system</td>
-<td align="right">685</td>
-<td align="right">21</td>
-<td align="right">11</td>
-<td align="right">0.016</td>
-<td align="right">0.524</td>
-<td align="right">4.60e-06</td>
-<td align="left">IL4R,OSM,CISH,EGR1,SOCS2,CD80,CDKN1A,MYC,PIM1,SOCS3,IRS2</td>
+<tr>
+<td style="text-align:left;">
+16
+</td>
+<td style="text-align:left;">
+Cytokine Signaling in Immune system
+</td>
+<td style="text-align:right;">
+685
+</td>
+<td style="text-align:right;">
+21
+</td>
+<td style="text-align:right;">
+11
+</td>
+<td style="text-align:right;">
+0.016
+</td>
+<td style="text-align:right;">
+0.524
+</td>
+<td style="text-align:right;">
+4.60e-06
+</td>
+<td style="text-align:left;">
+IL4R,OSM,CISH,EGR1,SOCS2,CD80,CDKN1A,MYC,PIM1,SOCS3,IRS2
+</td>
 </tr>
-<tr class="even">
-<td>18</td>
-<td align="left">Interleukin-4 and 13 signaling</td>
-<td align="right">111</td>
-<td align="right">21</td>
-<td align="right">6</td>
-<td align="right">0.054</td>
-<td align="right">0.286</td>
-<td align="right">1.68e-05</td>
-<td align="left">IL4R,OSM,CDKN1A,MYC,PIM1,SOCS3</td>
+<tr>
+<td style="text-align:left;">
+19
+</td>
+<td style="text-align:left;">
+Interleukin-4 and 13 signaling
+</td>
+<td style="text-align:right;">
+111
+</td>
+<td style="text-align:right;">
+21
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+0.054
+</td>
+<td style="text-align:right;">
+0.286
+</td>
+<td style="text-align:right;">
+1.68e-05
+</td>
+<td style="text-align:left;">
+IL4R,OSM,CDKN1A,MYC,PIM1,SOCS3
+</td>
 </tr>
-<tr class="odd">
-<td>16</td>
-<td align="left">Growth hormone receptor signaling</td>
-<td align="right">24</td>
-<td align="right">21</td>
-<td align="right">4</td>
-<td align="right">0.167</td>
-<td align="right">0.190</td>
-<td align="right">3.57e-05</td>
-<td align="left">CISH,SOCS2,SOCS3,IRS2</td>
+<tr>
+<td style="text-align:left;">
+17
+</td>
+<td style="text-align:left;">
+Growth hormone receptor signaling
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+21
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+0.167
+</td>
+<td style="text-align:right;">
+0.190
+</td>
+<td style="text-align:right;">
+3.57e-05
+</td>
+<td style="text-align:left;">
+CISH,SOCS2,SOCS3,IRS2
+</td>
 </tr>
-<tr class="even">
-<td>8</td>
-<td align="left">response to insulin</td>
-<td align="right">255</td>
-<td align="right">37</td>
-<td align="right">7</td>
-<td align="right">0.027</td>
-<td align="right">0.189</td>
-<td align="right">1.06e-03</td>
-<td align="left">CISH,EGR1,SOCS2,MYC,SOCS3,IRS2,PPARA</td>
+<tr>
+<td style="text-align:left;">
+11
+</td>
+<td style="text-align:left;">
+response to insulin
+</td>
+<td style="text-align:right;">
+255
+</td>
+<td style="text-align:right;">
+37
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+0.027
+</td>
+<td style="text-align:right;">
+0.189
+</td>
+<td style="text-align:right;">
+1.06e-03
+</td>
+<td style="text-align:left;">
+CISH,EGR1,SOCS2,MYC,SOCS3,IRS2,PPARA
+</td>
 </tr>
-<tr class="odd">
-<td>14</td>
-<td align="left">Immune System</td>
-<td align="right">2010</td>
-<td align="right">21</td>
-<td align="right">13</td>
-<td align="right">0.006</td>
-<td align="right">0.619</td>
-<td align="right">5.50e-03</td>
-<td align="left">IL4R,OSM,CISH,EGR1,SOCS2,CD80,CDKN1A,MYC,PIM1,MB21D1,HSPA6,SOCS3,IRS2</td>
+<tr>
+<td style="text-align:left;">
+15
+</td>
+<td style="text-align:left;">
+Immune System
+</td>
+<td style="text-align:right;">
+2010
+</td>
+<td style="text-align:right;">
+21
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+0.006
+</td>
+<td style="text-align:right;">
+0.619
+</td>
+<td style="text-align:right;">
+5.50e-03
+</td>
+<td style="text-align:left;">
+IL4R,OSM,CISH,EGR1,SOCS2,CD80,CDKN1A,MYC,PIM1,MB21D1,HSPA6,SOCS3,IRS2
+</td>
 </tr>
-<tr class="even">
-<td>1</td>
-<td align="left">response to oxygen-containing compound</td>
-<td align="right">1555</td>
-<td align="right">37</td>
-<td align="right">13</td>
-<td align="right">0.008</td>
-<td align="right">0.351</td>
-<td align="right">7.17e-03</td>
-<td align="left">CPEB4,CISH,KLF9,EGR1,SOCS2,CDKN1A,MYC,PIM1,AQP3,RARG,SOCS3,IRS2,PPARA</td>
+<tr>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+response to oxygen-containing compound
+</td>
+<td style="text-align:right;">
+1555
+</td>
+<td style="text-align:right;">
+37
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+0.008
+</td>
+<td style="text-align:right;">
+0.351
+</td>
+<td style="text-align:right;">
+7.17e-03
+</td>
+<td style="text-align:left;">
+CPEB4,CISH,KLF9,EGR1,SOCS2,CDKN1A,MYC,PIM1,AQP3,RARG,SOCS3,IRS2,PPARA
+</td>
 </tr>
-<tr class="odd">
-<td>20</td>
-<td align="left">TFAP2 (AP-2) family regulates transcription of cell cycle factors</td>
-<td align="right">5</td>
-<td align="right">21</td>
-<td align="right">2</td>
-<td align="right">0.400</td>
-<td align="right">0.095</td>
-<td align="right">1.11e-02</td>
-<td align="left">CDKN1A,MYC</td>
+<tr>
+<td style="text-align:left;">
+14
+</td>
+<td style="text-align:left;">
+TFAP2 (AP-2) family regulates transcription of cell cycle factors
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+21
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.400
+</td>
+<td style="text-align:right;">
+0.095
+</td>
+<td style="text-align:right;">
+1.11e-02
+</td>
+<td style="text-align:left;">
+CDKN1A,MYC
+</td>
 </tr>
-<tr class="even">
-<td>19</td>
-<td align="left">Interleukin-7 signaling</td>
-<td align="right">36</td>
-<td align="right">21</td>
-<td align="right">3</td>
-<td align="right">0.083</td>
-<td align="right">0.143</td>
-<td align="right">1.38e-02</td>
-<td align="left">CISH,SOCS2,IRS2</td>
+<tr>
+<td style="text-align:left;">
+20
+</td>
+<td style="text-align:left;">
+Interleukin-7 signaling
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+21
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0.083
+</td>
+<td style="text-align:right;">
+0.143
+</td>
+<td style="text-align:right;">
+1.38e-02
+</td>
+<td style="text-align:left;">
+CISH,SOCS2,IRS2
+</td>
 </tr>
 </tbody>
 </table>
@@ -1250,138 +2074,115 @@ induced.sign &lt;-<span class="st"> </span><span class="kw">rownames</span>(res_
     term.induced &lt;-<span class="st"> </span>term.induced[<span class="kw">order</span>(term.induced<span class="op">$</span>p.value), 
         ]
     <span class="co"># term.induced$p.value</span>
-    <span class="kw">kable</span>(term.induced[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, <span class="kw">c</span>(<span class="st">&quot;term.name&quot;</span>, 
-        <span class="st">&quot;term.size&quot;</span>, <span class="st">&quot;query.size&quot;</span>, 
-        <span class="st">&quot;overlap.size&quot;</span>, <span class="st">&quot;recall&quot;</span>, 
-        <span class="st">&quot;precision&quot;</span>, <span class="st">&quot;p.value&quot;</span>, 
-        <span class="st">&quot;intersection&quot;</span>)], <span class="dt">format.args =</span> <span class="kw">c</span>(<span class="dt">engeneer =</span> <span class="ot">TRUE</span>, 
-        <span class="dt">digits =</span> <span class="dv">3</span>), <span class="dt">caption =</span> <span class="st">&quot;**Table: induced gene functional analysis wit gProfileR. ** &quot;</span>)
+    <span class="kw">na.omit</span>(term.induced)
+    <span class="cf">if</span> (<span class="kw">nrow</span>(term.induced) <span class="op">&gt;=</span><span class="st"> </span><span class="dv">10</span>) {
+        rowlim =<span class="st"> </span><span class="dv">10</span>
+    } <span class="cf">else</span> {
+        rowlim =<span class="st"> </span><span class="kw">nrow</span>(term.induced)
+    }
+    <span class="kw">kable</span>(term.induced[<span class="dv">1</span><span class="op">:</span>rowlim, 
+        <span class="kw">c</span>(<span class="st">&quot;term.name&quot;</span>, <span class="st">&quot;term.size&quot;</span>, 
+            <span class="st">&quot;query.size&quot;</span>, <span class="st">&quot;overlap.size&quot;</span>, 
+            <span class="st">&quot;recall&quot;</span>, <span class="st">&quot;precision&quot;</span>, 
+            <span class="st">&quot;p.value&quot;</span>, <span class="st">&quot;intersection&quot;</span>)], 
+        <span class="dt">format.args =</span> <span class="kw">c</span>(<span class="dt">engeneer =</span> <span class="ot">TRUE</span>, 
+            <span class="dt">digits =</span> <span class="dv">3</span>), <span class="dt">caption =</span> <span class="st">&quot;**Table: induced gene functional analysis wit gProfileR. ** &quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">        </span><span class="kw">kable_styling</span>(<span class="dt">bootstrap_options =</span> <span class="kw">c</span>(<span class="st">&quot;striped&quot;</span>, 
+            <span class="st">&quot;hover&quot;</span>, <span class="st">&quot;condensed&quot;</span>, 
+            <span class="st">&quot;responsive&quot;</span>))
 }</code></pre></div>
-<table>
-<caption>(#tab:code block 33)<strong>Table: induced gene functional analysis wit gProfileR. </strong></caption>
+<table class="table table-striped table-hover table-condensed table-responsive" style="margin-left: auto; margin-right: auto;">
+<caption>
+(#tab:code block 33)<strong>Table: induced gene functional analysis wit gProfileR. </strong>
+</caption>
 <thead>
-<tr class="header">
-<th></th>
-<th align="left">term.name</th>
-<th align="right">term.size</th>
-<th align="right">query.size</th>
-<th align="right">overlap.size</th>
-<th align="right">recall</th>
-<th align="right">precision</th>
-<th align="right">p.value</th>
-<th align="left">intersection</th>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+term.name
+</th>
+<th style="text-align:right;">
+term.size
+</th>
+<th style="text-align:right;">
+query.size
+</th>
+<th style="text-align:right;">
+overlap.size
+</th>
+<th style="text-align:right;">
+recall
+</th>
+<th style="text-align:right;">
+precision
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+<th style="text-align:left;">
+intersection
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td>1</td>
-<td align="left">macrolide binding</td>
-<td align="right">16</td>
-<td align="right">45</td>
-<td align="right">3</td>
-<td align="right">0.188</td>
-<td align="right">0.067</td>
-<td align="right">0.0201</td>
-<td align="left">FKBP4,FKBP3,FKBP2</td>
+<tr>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+Sulfide oxidation to sulfate
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.333
+</td>
+<td style="text-align:right;">
+0.118
+</td>
+<td style="text-align:right;">
+0.00963
+</td>
+<td style="text-align:left;">
+TST,SLC25A10
+</td>
 </tr>
-<tr class="even">
-<td>2</td>
-<td align="left">FK506 binding</td>
-<td align="right">16</td>
-<td align="right">45</td>
-<td align="right">3</td>
-<td align="right">0.188</td>
-<td align="right">0.067</td>
-<td align="right">0.0201</td>
-<td align="left">FKBP4,FKBP3,FKBP2</td>
-</tr>
-<tr class="odd">
-<td>3</td>
-<td align="left">Factor: E2F-3; motif: GGCGGGN; match class: 1</td>
-<td align="right">9297</td>
-<td align="right">45</td>
-<td align="right">35</td>
-<td align="right">0.004</td>
-<td align="right">0.778</td>
-<td align="right">0.0464</td>
-<td align="left">FKBP4,RANBP3,SNX24,XPO1,ZFAND6,KIF16B,FKBP3,TRIB3,RELB,FAM184A,ZNF142,LGALSL,ACTR10,TET1,COL6A1,DCAF6,CDCA7,TAGLN,HNRNPDL,TRIM11,OTUD6B,EYA3,ERCC3,DACT1,FAM69B,SPATA33,DDB1,UPF3A,DUS1L,ZNF524,FKBP2,TALDO1,LIN28B,DACT3,ZNF521</td>
-</tr>
-<tr class="even">
-<td>NA</td>
-<td align="left">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="odd">
-<td>NA.1</td>
-<td align="left">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="even">
-<td>NA.2</td>
-<td align="left">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="odd">
-<td>NA.3</td>
-<td align="left">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="even">
-<td>NA.4</td>
-<td align="left">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="odd">
-<td>NA.5</td>
-<td align="left">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="even">
-<td>NA.6</td>
-<td align="left">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="left">NA</td>
+<tr>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+Degradation of cysteine and homocysteine
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.154
+</td>
+<td style="text-align:right;">
+0.118
+</td>
+<td style="text-align:right;">
+0.04970
+</td>
+<td style="text-align:left;">
+TST,SLC25A10
+</td>
 </tr>
 </tbody>
 </table>
@@ -1395,139 +2196,348 @@ induced.sign &lt;-<span class="st"> </span><span class="kw">rownames</span>(res_
         <span class="dt">organism =</span> <span class="st">&quot;hsapiens&quot;</span>)
     term.repressed &lt;-<span class="st"> </span>term.repressed[<span class="kw">order</span>(term.repressed<span class="op">$</span>p.value), 
         ]
-    <span class="kw">kable</span>(term.repressed[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, 
+    <span class="kw">na.omit</span>(term.repressed)
+    <span class="cf">if</span> (<span class="kw">nrow</span>(term.repressed) <span class="op">&gt;=</span><span class="st"> </span>
+<span class="st">        </span><span class="dv">10</span>) {
+        rowlim =<span class="st"> </span><span class="dv">10</span>
+    } <span class="cf">else</span> {
+        rowlim =<span class="st"> </span><span class="kw">nrow</span>(term.repressed)
+    }
+    <span class="kw">kable</span>(term.repressed[<span class="dv">1</span><span class="op">:</span>rowlim, 
         <span class="kw">c</span>(<span class="st">&quot;term.name&quot;</span>, <span class="st">&quot;term.size&quot;</span>, 
             <span class="st">&quot;query.size&quot;</span>, <span class="st">&quot;overlap.size&quot;</span>, 
             <span class="st">&quot;recall&quot;</span>, <span class="st">&quot;precision&quot;</span>, 
             <span class="st">&quot;p.value&quot;</span>, <span class="st">&quot;intersection&quot;</span>)], 
         <span class="dt">format.args =</span> <span class="kw">c</span>(<span class="dt">engeneer =</span> <span class="ot">TRUE</span>, 
-            <span class="dt">digits =</span> <span class="dv">3</span>), <span class="dt">caption =</span> <span class="st">&quot;**Table: repressed genes functional analysis with gProfileR. ** &quot;</span>)
+            <span class="dt">digits =</span> <span class="dv">3</span>), <span class="dt">caption =</span> <span class="st">&quot;**Table: repressed genes functional analysis with gProfileR. ** &quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">        </span><span class="kw">kable_styling</span>(<span class="dt">bootstrap_options =</span> <span class="kw">c</span>(<span class="st">&quot;striped&quot;</span>, 
+            <span class="st">&quot;hover&quot;</span>, <span class="st">&quot;condensed&quot;</span>, 
+            <span class="st">&quot;responsive&quot;</span>))
 }</code></pre></div>
-<table>
-<caption>(#tab:code block 33)<strong>Table: repressed genes functional analysis with gProfileR. </strong></caption>
+<table class="table table-striped table-hover table-condensed table-responsive" style="margin-left: auto; margin-right: auto;">
+<caption>
+(#tab:code block 33)<strong>Table: repressed genes functional analysis with gProfileR. </strong>
+</caption>
 <thead>
-<tr class="header">
-<th></th>
-<th align="left">term.name</th>
-<th align="right">term.size</th>
-<th align="right">query.size</th>
-<th align="right">overlap.size</th>
-<th align="right">recall</th>
-<th align="right">precision</th>
-<th align="right">p.value</th>
-<th align="left">intersection</th>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+term.name
+</th>
+<th style="text-align:right;">
+term.size
+</th>
+<th style="text-align:right;">
+query.size
+</th>
+<th style="text-align:right;">
+overlap.size
+</th>
+<th style="text-align:right;">
+recall
+</th>
+<th style="text-align:right;">
+precision
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+<th style="text-align:left;">
+intersection
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td>19</td>
-<td align="left">Cytokine Signaling in Immune system</td>
-<td align="right">685</td>
-<td align="right">22</td>
-<td align="right">11</td>
-<td align="right">0.016</td>
-<td align="right">0.500</td>
-<td align="right">7.90e-06</td>
-<td align="left">ICAM1,OSM,NFKBIA,RELB,CISH,EGR1,SOCS2,IRF1,MYC,PIM1,JUN</td>
+<tr>
+<td style="text-align:left;">
+25
+</td>
+<td style="text-align:left;">
+Cytokine Signaling in Immune system
+</td>
+<td style="text-align:right;">
+685
+</td>
+<td style="text-align:right;">
+21
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+0.015
+</td>
+<td style="text-align:right;">
+0.476
+</td>
+<td style="text-align:right;">
+6.82e-05
+</td>
+<td style="text-align:left;">
+ICAM1,NFKBIA,RELB,CISH,EGR1,SOCS2,IRF1,MYC,PIM1,JUN
+</td>
 </tr>
-<tr class="even">
-<td>18</td>
-<td align="left">Immune System</td>
-<td align="right">2010</td>
-<td align="right">22</td>
-<td align="right">16</td>
-<td align="right">0.008</td>
-<td align="right">0.727</td>
-<td align="right">1.80e-05</td>
-<td align="left">ICAM1,OSM,NFKBIA,RELB,CISH,TNFAIP3,EGR1,SOCS2,IRF1,MYC,PIM1,NFKBIE,MB21D1,SLCO4C1,JUN,UBOX5</td>
+<tr>
+<td style="text-align:left;">
+24
+</td>
+<td style="text-align:left;">
+Immune System
+</td>
+<td style="text-align:right;">
+2010
+</td>
+<td style="text-align:right;">
+21
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+0.007
+</td>
+<td style="text-align:right;">
+0.714
+</td>
+<td style="text-align:right;">
+7.65e-05
+</td>
+<td style="text-align:left;">
+ICAM1,NFKBIA,RELB,CISH,TNFAIP3,EGR1,SOCS2,IRF1,MYC,PIM1,NFKBIE,MB21D1,SLCO4C1,JUN,UBOX5
+</td>
 </tr>
-<tr class="odd">
-<td>13</td>
-<td align="left">Epstein-Barr virus infection</td>
-<td align="right">197</td>
-<td align="right">26</td>
-<td align="right">7</td>
-<td align="right">0.036</td>
-<td align="right">0.269</td>
-<td align="right">2.44e-04</td>
-<td align="left">ICAM1,NFKBIA,RELB,TNFAIP3,MYC,NFKBIE,JUN</td>
+<tr>
+<td style="text-align:left;">
+20
+</td>
+<td style="text-align:left;">
+Epstein-Barr virus infection
+</td>
+<td style="text-align:right;">
+197
+</td>
+<td style="text-align:right;">
+23
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+0.036
+</td>
+<td style="text-align:right;">
+0.304
+</td>
+<td style="text-align:right;">
+8.57e-05
+</td>
+<td style="text-align:left;">
+ICAM1,NFKBIA,RELB,TNFAIP3,MYC,NFKBIE,JUN
+</td>
 </tr>
-<tr class="even">
-<td>20</td>
-<td align="left">Signaling by Interleukins</td>
-<td align="right">463</td>
-<td align="right">22</td>
-<td align="right">8</td>
-<td align="right">0.017</td>
-<td align="right">0.364</td>
-<td align="right">6.51e-04</td>
-<td align="left">ICAM1,OSM,NFKBIA,CISH,SOCS2,MYC,PIM1,JUN</td>
+<tr>
+<td style="text-align:left;">
+22
+</td>
+<td style="text-align:left;">
+HTLV-I infection
+</td>
+<td style="text-align:right;">
+253
+</td>
+<td style="text-align:right;">
+23
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+0.028
+</td>
+<td style="text-align:right;">
+0.304
+</td>
+<td style="text-align:right;">
+4.54e-04
+</td>
+<td style="text-align:left;">
+ICAM1,NFKBIA,RELB,EGR1,MYC,ETS2,JUN
+</td>
 </tr>
-<tr class="odd">
-<td>3</td>
-<td align="left">I-kappaB/NF-kappaB complex</td>
-<td align="right">7</td>
-<td align="right">42</td>
-<td align="right">3</td>
-<td align="right">0.429</td>
-<td align="right">0.071</td>
-<td align="right">8.70e-04</td>
-<td align="left">BCL3,NFKBIA,RELB</td>
+<tr>
+<td style="text-align:left;">
+27
+</td>
+<td style="text-align:left;">
+Factor: E2F; motif: GGCGSG; match class: 1
+</td>
+<td style="text-align:right;">
+10205
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+33
+</td>
+<td style="text-align:right;">
+0.003
+</td>
+<td style="text-align:right;">
+0.917
+</td>
+<td style="text-align:right;">
+5.29e-04
+</td>
+<td style="text-align:left;">
+MSMO1,VMP1,KLF6,ICAM1,NFKBIA,RELB,ARRDC3,CISH,TNFAIP3,EGR1,SOCS2,ARL4A,IRF1,A4GALT,TMEM160,NINJ1,BHLHE40,MYC,PIM1,NFKBIZ,NFKBIE,RAB11FIP1,ETS2,ANKRD33B,MB21D1,KCNK5,STARD5,SLCO4C1,JUN,DDN,H1FX,UBOX5,TSC22D2
+</td>
 </tr>
-<tr class="even">
-<td>22</td>
-<td align="left">Factor: E2F; motif: GGCGSG; match class: 1</td>
-<td align="right">10205</td>
-<td align="right">42</td>
-<td align="right">37</td>
-<td align="right">0.004</td>
-<td align="right">0.881</td>
-<td align="right">1.14e-03</td>
-<td align="left">MSMO1,VMP1,KLF6,BCL3,ICAM1,OSM,NFKBIA,RELB,ARRDC3,CISH,TNFAIP3,EGR1,SOCS2,ARL4A,IRF1,A4GALT,TMEM160,NINJ1,BHLHE40,STX11,MYC,PIM1,NFKBIZ,NFKBIE,RAB11FIP1,ETS2,ANKRD33B,MB21D1,KCNK5,LETM2,STARD5,SLCO4C1,JUN,DDN,H1FX,UBOX5,TSC22D2</td>
+<tr>
+<td style="text-align:left;">
+16
+</td>
+<td style="text-align:left;">
+TNF-alpha/NF-kappa B signaling complex (CHUK, KPNA3, NFKB2, NFKBIB, REL, IKBKG, NFKB1, NFKBIE, RELB, NFKBIA, RELA, TNIP2)
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0.250
+</td>
+<td style="text-align:right;">
+0.300
+</td>
+<td style="text-align:right;">
+9.73e-04
+</td>
+<td style="text-align:left;">
+NFKBIA,RELB,NFKBIE
+</td>
 </tr>
-<tr class="odd">
-<td>11</td>
-<td align="left">HTLV-I infection</td>
-<td align="right">253</td>
-<td align="right">26</td>
-<td align="right">7</td>
-<td align="right">0.028</td>
-<td align="right">0.269</td>
-<td align="right">1.26e-03</td>
-<td align="left">ICAM1,NFKBIA,RELB,EGR1,MYC,ETS2,JUN</td>
+<tr>
+<td style="text-align:left;">
+15
+</td>
+<td style="text-align:left;">
+transcription factor activity, RNA polymerase II proximal promoter sequence-specific DNA binding
+</td>
+<td style="text-align:right;">
+399
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+0.020
+</td>
+<td style="text-align:right;">
+0.222
+</td>
+<td style="text-align:right;">
+1.32e-03
+</td>
+<td style="text-align:left;">
+KLF6,EGR1,IRF1,BHLHE40,MYC,ETS2,JUN,DDN
+</td>
 </tr>
-<tr class="even">
-<td>14</td>
-<td align="left">C-type lectin receptor signaling pathway</td>
-<td align="right">104</td>
-<td align="right">26</td>
-<td align="right">5</td>
-<td align="right">0.048</td>
-<td align="right">0.192</td>
-<td align="right">1.70e-03</td>
-<td align="left">BCL3,NFKBIA,RELB,IRF1,JUN</td>
+<tr>
+<td style="text-align:left;">
+12
+</td>
+<td style="text-align:left;">
+RNA polymerase II regulatory region sequence-specific DNA binding
+</td>
+<td style="text-align:right;">
+634
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+0.014
+</td>
+<td style="text-align:right;">
+0.250
+</td>
+<td style="text-align:right;">
+4.17e-03
+</td>
+<td style="text-align:left;">
+KLF6,RELB,EGR1,IRF1,BHLHE40,MYC,ETS2,JUN,DDN
+</td>
 </tr>
-<tr class="odd">
-<td>15</td>
-<td align="left">TNF signaling pathway</td>
-<td align="right">108</td>
-<td align="right">26</td>
-<td align="right">5</td>
-<td align="right">0.046</td>
-<td align="right">0.192</td>
-<td align="right">2.04e-03</td>
-<td align="left">BCL3,ICAM1,NFKBIA,TNFAIP3,JUN</td>
+<tr>
+<td style="text-align:left;">
+9
+</td>
+<td style="text-align:left;">
+RNA polymerase II regulatory region DNA binding
+</td>
+<td style="text-align:right;">
+635
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+0.014
+</td>
+<td style="text-align:right;">
+0.250
+</td>
+<td style="text-align:right;">
+4.23e-03
+</td>
+<td style="text-align:left;">
+KLF6,RELB,EGR1,IRF1,BHLHE40,MYC,ETS2,JUN,DDN
+</td>
 </tr>
-<tr class="even">
-<td>9</td>
-<td align="left">TNF-alpha/NF-kappa B signaling complex (CHUK, KPNA3, NFKB2, NFKBIB, REL, IKBKG, NFKB1, NFKBIE, RELB, NFKBIA, RELA, TNIP2)</td>
-<td align="right">12</td>
-<td align="right">12</td>
-<td align="right">3</td>
-<td align="right">0.250</td>
-<td align="right">0.250</td>
-<td align="right">2.54e-03</td>
-<td align="left">NFKBIA,RELB,NFKBIE</td>
+<tr>
+<td style="text-align:left;">
+6
+</td>
+<td style="text-align:left;">
+double-stranded DNA binding
+</td>
+<td style="text-align:right;">
+832
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+0.012
+</td>
+<td style="text-align:right;">
+0.278
+</td>
+<td style="text-align:right;">
+4.47e-03
+</td>
+<td style="text-align:left;">
+KLF6,RELB,EGR1,IRF1,BHLHE40,MYC,ETS2,MB21D1,JUN,DDN
+</td>
 </tr>
 </tbody>
 </table>
@@ -1621,142 +2631,30 @@ induced.sign &lt;-<span class="st"> </span><span class="kw">rownames</span>(res_
         <span class="dt">organism =</span> <span class="st">&quot;hsapiens&quot;</span>)
     term.induced &lt;-<span class="st"> </span>term.induced[<span class="kw">order</span>(term.induced<span class="op">$</span>p.value), 
         ]
+    <span class="kw">na.omit</span>(term.induced)
+    <span class="cf">if</span> (<span class="kw">nrow</span>(term.induced) <span class="op">&gt;=</span><span class="st"> </span><span class="dv">10</span>) {
+        rowlim =<span class="st"> </span><span class="dv">10</span>
+    } <span class="cf">else</span> {
+        rowlim =<span class="st"> </span><span class="kw">nrow</span>(term.induced)
+    }
     <span class="co"># term.induced$p.value</span>
-    <span class="kw">kable</span>(term.induced[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, <span class="kw">c</span>(<span class="st">&quot;term.name&quot;</span>, 
-        <span class="st">&quot;term.size&quot;</span>, <span class="st">&quot;query.size&quot;</span>, 
-        <span class="st">&quot;overlap.size&quot;</span>, <span class="st">&quot;recall&quot;</span>, 
-        <span class="st">&quot;precision&quot;</span>, <span class="st">&quot;p.value&quot;</span>, 
-        <span class="st">&quot;intersection&quot;</span>)], <span class="dt">format.args =</span> <span class="kw">c</span>(<span class="dt">engeneer =</span> <span class="ot">TRUE</span>, 
-        <span class="dt">digits =</span> <span class="dv">3</span>), <span class="dt">caption =</span> <span class="st">&quot;**Table: induced gene functional analysis wit gProfileR. ** &quot;</span>)
+    <span class="cf">if</span> (<span class="kw">length</span>(term.induced<span class="op">$</span>term.name) <span class="op">==</span><span class="st"> </span>
+<span class="st">        </span><span class="dv">0</span>) {
+        <span class="kw">cat</span>(<span class="st">&quot;No terms found that have induced expression using the genelist&quot;</span>)
+    } <span class="cf">else</span> {
+        <span class="kw">kable</span>(term.induced[<span class="dv">1</span><span class="op">:</span>rowlim, 
+            <span class="kw">c</span>(<span class="st">&quot;term.name&quot;</span>, <span class="st">&quot;term.size&quot;</span>, 
+                <span class="st">&quot;query.size&quot;</span>, <span class="st">&quot;overlap.size&quot;</span>, 
+                <span class="st">&quot;recall&quot;</span>, <span class="st">&quot;precision&quot;</span>, 
+                <span class="st">&quot;p.value&quot;</span>, <span class="st">&quot;intersection&quot;</span>)], 
+            <span class="dt">format.args =</span> <span class="kw">c</span>(<span class="dt">engeneer =</span> <span class="ot">TRUE</span>, 
+                <span class="dt">digits =</span> <span class="dv">3</span>), <span class="dt">caption =</span> <span class="st">&quot;**Table: induced gene functional analysis with gProfileR. ** &quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">            </span><span class="kw">kable_styling</span>(<span class="dt">bootstrap_options =</span> <span class="kw">c</span>(<span class="st">&quot;striped&quot;</span>, 
+                <span class="st">&quot;hover&quot;</span>, <span class="st">&quot;condensed&quot;</span>, 
+                <span class="st">&quot;responsive&quot;</span>))
+    }
 }</code></pre></div>
-<table>
-<caption>(#tab:code block 39)<strong>Table: induced gene functional analysis wit gProfileR. </strong></caption>
-<thead>
-<tr class="header">
-<th></th>
-<th align="left">term.name</th>
-<th align="left">term.size</th>
-<th align="left">query.size</th>
-<th align="left">overlap.size</th>
-<th align="left">recall</th>
-<th align="left">precision</th>
-<th align="left">p.value</th>
-<th align="left">intersection</th>
-</tr>
-</thead>
-<tbody>
-<tr class="odd">
-<td>NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="even">
-<td>NA.1</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="odd">
-<td>NA.2</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="even">
-<td>NA.3</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="odd">
-<td>NA.4</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="even">
-<td>NA.5</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="odd">
-<td>NA.6</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="even">
-<td>NA.7</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="odd">
-<td>NA.8</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="even">
-<td>NA.9</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-<td align="left">NA</td>
-</tr>
-</tbody>
-</table>
+<pre><code>## No terms found that have induced expression using the genelist</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r">repressed.sign &lt;-<span class="st"> </span><span class="kw">rownames</span>(res_WT_H.df)[res_WT_H.df<span class="op">$</span>log2FoldChange <span class="op">&lt;=</span><span class="st"> </span>
 <span class="st">    </span><span class="op">-</span><span class="fl">0.5</span> <span class="op">&amp;</span><span class="st"> </span>res_WT_H.df<span class="op">$</span>padj <span class="op">&lt;</span><span class="st"> </span>p_cutoff]
 <span class="cf">if</span> (<span class="kw">identical</span>(repressed.sign, <span class="kw">character</span>(<span class="dv">0</span>))) {
@@ -1766,139 +2664,348 @@ induced.sign &lt;-<span class="st"> </span><span class="kw">rownames</span>(res_
         <span class="dt">organism =</span> <span class="st">&quot;hsapiens&quot;</span>)
     term.repressed &lt;-<span class="st"> </span>term.repressed[<span class="kw">order</span>(term.repressed<span class="op">$</span>p.value), 
         ]
-    <span class="kw">kable</span>(term.repressed[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, 
+    <span class="kw">na.omit</span>(term.repressed)
+    <span class="cf">if</span> (<span class="kw">nrow</span>(term.repressed) <span class="op">&gt;=</span><span class="st"> </span>
+<span class="st">        </span><span class="dv">10</span>) {
+        rowlim =<span class="st"> </span><span class="dv">10</span>
+    } <span class="cf">else</span> {
+        rowlim =<span class="st"> </span><span class="kw">nrow</span>(term.repressed)
+    }
+    <span class="kw">kable</span>(term.repressed[<span class="dv">1</span><span class="op">:</span>rowlim, 
         <span class="kw">c</span>(<span class="st">&quot;term.name&quot;</span>, <span class="st">&quot;term.size&quot;</span>, 
             <span class="st">&quot;query.size&quot;</span>, <span class="st">&quot;overlap.size&quot;</span>, 
             <span class="st">&quot;recall&quot;</span>, <span class="st">&quot;precision&quot;</span>, 
             <span class="st">&quot;p.value&quot;</span>, <span class="st">&quot;intersection&quot;</span>)], 
         <span class="dt">format.args =</span> <span class="kw">c</span>(<span class="dt">engeneer =</span> <span class="ot">TRUE</span>, 
-            <span class="dt">digits =</span> <span class="dv">3</span>), <span class="dt">caption =</span> <span class="st">&quot;**Table: repressed genes functional analysis with gProfileR. ** &quot;</span>)
+            <span class="dt">digits =</span> <span class="dv">3</span>), <span class="dt">caption =</span> <span class="st">&quot;**Table: repressed genes functional analysis with gProfileR. ** &quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">        </span><span class="kw">kable_styling</span>(<span class="dt">bootstrap_options =</span> <span class="kw">c</span>(<span class="st">&quot;striped&quot;</span>, 
+            <span class="st">&quot;hover&quot;</span>, <span class="st">&quot;condensed&quot;</span>, 
+            <span class="st">&quot;responsive&quot;</span>))
 }</code></pre></div>
-<table>
-<caption>(#tab:code block 39)<strong>Table: repressed genes functional analysis with gProfileR. </strong></caption>
+<table class="table table-striped table-hover table-condensed table-responsive" style="margin-left: auto; margin-right: auto;">
+<caption>
+(#tab:code block 39)<strong>Table: repressed genes functional analysis with gProfileR. </strong>
+</caption>
 <thead>
-<tr class="header">
-<th></th>
-<th align="left">term.name</th>
-<th align="right">term.size</th>
-<th align="right">query.size</th>
-<th align="right">overlap.size</th>
-<th align="right">recall</th>
-<th align="right">precision</th>
-<th align="right">p.value</th>
-<th align="left">intersection</th>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+term.name
+</th>
+<th style="text-align:right;">
+term.size
+</th>
+<th style="text-align:right;">
+query.size
+</th>
+<th style="text-align:right;">
+overlap.size
+</th>
+<th style="text-align:right;">
+recall
+</th>
+<th style="text-align:right;">
+precision
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+<th style="text-align:left;">
+intersection
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td>10</td>
-<td align="left">TNF signaling pathway</td>
-<td align="right">108</td>
-<td align="right">14</td>
-<td align="right">5</td>
-<td align="right">0.046</td>
-<td align="right">0.357</td>
-<td align="right">6.81e-05</td>
-<td align="left">BCL3,ICAM1,NFKBIA,TNFAIP3,JUN</td>
+<tr>
+<td style="text-align:left;">
+12
+</td>
+<td style="text-align:left;">
+Epstein-Barr virus infection
+</td>
+<td style="text-align:right;">
+197
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+0.025
+</td>
+<td style="text-align:right;">
+0.417
+</td>
+<td style="text-align:right;">
+0.000472
+</td>
+<td style="text-align:left;">
+ICAM1,NFKBIA,TNFAIP3,NFKBIE,JUN
+</td>
 </tr>
-<tr class="even">
-<td>7</td>
-<td align="left">Epstein-Barr virus infection</td>
-<td align="right">197</td>
-<td align="right">14</td>
-<td align="right">5</td>
-<td align="right">0.025</td>
-<td align="right">0.357</td>
-<td align="right">1.31e-03</td>
-<td align="left">ICAM1,NFKBIA,TNFAIP3,NFKBIE,JUN</td>
+<tr>
+<td style="text-align:left;">
+14
+</td>
+<td style="text-align:left;">
+TNF signaling pathway
+</td>
+<td style="text-align:right;">
+108
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+0.037
+</td>
+<td style="text-align:right;">
+0.333
+</td>
+<td style="text-align:right;">
+0.001050
+</td>
+<td style="text-align:left;">
+ICAM1,NFKBIA,TNFAIP3,JUN
+</td>
 </tr>
-<tr class="odd">
-<td>3</td>
-<td align="left">CHUK-NFKB2-REL-IKBKG-SPAG9-NFKB1-NFKBIE-COPB2-TNIP1-NFKBIA-RELA-TNIP2 complex</td>
-<td align="right">12</td>
-<td align="right">6</td>
-<td align="right">2</td>
-<td align="right">0.167</td>
-<td align="right">0.333</td>
-<td align="right">1.11e-02</td>
-<td align="left">NFKBIA,NFKBIE</td>
+<tr>
+<td style="text-align:left;">
+4
+</td>
+<td style="text-align:left;">
+CHUK-NFKB2-REL-IKBKG-SPAG9-NFKB1-NFKBIE-COPB2-TNIP1-NFKBIA-RELA-TNIP2 complex
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.167
+</td>
+<td style="text-align:right;">
+0.500
+</td>
+<td style="text-align:right;">
+0.003060
+</td>
+<td style="text-align:left;">
+NFKBIA,NFKBIE
+</td>
 </tr>
-<tr class="even">
-<td>4</td>
-<td align="left">TNF-alpha/NF-kappa B signaling complex (CHUK, KPNA3, NFKB2, NFKBIB, REL, IKBKG, NFKB1, NFKBIE, RELB, NFKBIA, RELA, TNIP2)</td>
-<td align="right">12</td>
-<td align="right">6</td>
-<td align="right">2</td>
-<td align="right">0.167</td>
-<td align="right">0.333</td>
-<td align="right">1.11e-02</td>
-<td align="left">NFKBIA,NFKBIE</td>
+<tr>
+<td style="text-align:left;">
+6
+</td>
+<td style="text-align:left;">
+TNF-alpha/NF-kappa B signaling complex (CHUK, KPNA3, NFKB2, NFKBIB, REL, IKBKG, NFKB1, NFKBIE, RELB, NFKBIA, RELA, TNIP2)
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.167
+</td>
+<td style="text-align:right;">
+0.500
+</td>
+<td style="text-align:right;">
+0.003060
+</td>
+<td style="text-align:left;">
+NFKBIA,NFKBIE
+</td>
 </tr>
-<tr class="odd">
-<td>2</td>
-<td align="left">regulation of DNA binding transcription factor activity</td>
-<td align="right">400</td>
-<td align="right">23</td>
-<td align="right">6</td>
-<td align="right">0.015</td>
-<td align="right">0.261</td>
-<td align="right">1.34e-02</td>
-<td align="left">ICAM1,NFKBIA,TNFAIP3,BHLHE40,NFKBIE,JUN</td>
+<tr>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+regulation of DNA binding transcription factor activity
+</td>
+<td style="text-align:right;">
+400
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+0.015
+</td>
+<td style="text-align:right;">
+0.300
+</td>
+<td style="text-align:right;">
+0.005180
+</td>
+<td style="text-align:left;">
+ICAM1,NFKBIA,TNFAIP3,BHLHE40,NFKBIE,JUN
+</td>
 </tr>
-<tr class="even">
-<td>9</td>
-<td align="left">B cell receptor signaling pathway</td>
-<td align="right">70</td>
-<td align="right">14</td>
-<td align="right">3</td>
-<td align="right">0.043</td>
-<td align="right">0.214</td>
-<td align="right">1.68e-02</td>
-<td align="left">NFKBIA,NFKBIE,JUN</td>
+<tr>
+<td style="text-align:left;">
+9
+</td>
+<td style="text-align:left;">
+B cell receptor signaling pathway
+</td>
+<td style="text-align:right;">
+70
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0.043
+</td>
+<td style="text-align:right;">
+0.250
+</td>
+<td style="text-align:right;">
+0.008990
+</td>
+<td style="text-align:left;">
+NFKBIA,NFKBIE,JUN
+</td>
 </tr>
-<tr class="odd">
-<td>1</td>
-<td align="left">nucleotide-binding oligomerization domain containing 1 signaling pathway</td>
-<td align="right">4</td>
-<td align="right">23</td>
-<td align="right">2</td>
-<td align="right">0.500</td>
-<td align="right">0.087</td>
-<td align="right">1.93e-02</td>
-<td align="left">NFKBIA,TNFAIP3</td>
+<tr>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:left;">
+nucleotide-binding oligomerization domain containing 1 signaling pathway
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.500
+</td>
+<td style="text-align:right;">
+0.100
+</td>
+<td style="text-align:right;">
+0.013800
+</td>
+<td style="text-align:left;">
+NFKBIA,TNFAIP3
+</td>
 </tr>
-<tr class="even">
-<td>12</td>
-<td align="left">Factor: NF-kappaB; motif: GGGGATYCCC</td>
-<td align="right">6390</td>
-<td align="right">22</td>
-<td align="right">17</td>
-<td align="right">0.003</td>
-<td align="right">0.773</td>
-<td align="right">3.27e-02</td>
-<td align="left">BCL3,ICAM1,HIVEP1,NFKBIA,ARRDC3,TNFAIP3,NINJ1,STX11,NFKBIZ,NFKBIE,ZFP36L2,KLF15,TPSAB1,SLCO4C1,FAM174A,JUN,H1F0</td>
+<tr>
+<td style="text-align:left;">
+13
+</td>
+<td style="text-align:left;">
+Th1 and Th2 cell differentiation
+</td>
+<td style="text-align:right;">
+90
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0.033
+</td>
+<td style="text-align:right;">
+0.250
+</td>
+<td style="text-align:right;">
+0.018900
+</td>
+<td style="text-align:left;">
+NFKBIA,NFKBIE,JUN
+</td>
 </tr>
-<tr class="odd">
-<td>13</td>
-<td align="left">Factor: NF-kappaB; motif: GGGGATYCCC; match class: 0</td>
-<td align="right">6390</td>
-<td align="right">22</td>
-<td align="right">17</td>
-<td align="right">0.003</td>
-<td align="right">0.773</td>
-<td align="right">3.27e-02</td>
-<td align="left">BCL3,ICAM1,HIVEP1,NFKBIA,ARRDC3,TNFAIP3,NINJ1,STX11,NFKBIZ,NFKBIE,ZFP36L2,KLF15,TPSAB1,SLCO4C1,FAM174A,JUN,H1F0</td>
+<tr>
+<td style="text-align:left;">
+7
+</td>
+<td style="text-align:left;">
+IL-17 signaling pathway
+</td>
+<td style="text-align:right;">
+92
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0.033
+</td>
+<td style="text-align:right;">
+0.250
+</td>
+<td style="text-align:right;">
+0.020200
+</td>
+<td style="text-align:left;">
+NFKBIA,TNFAIP3,JUN
+</td>
 </tr>
-<tr class="even">
-<td>11</td>
-<td align="left">Th1 and Th2 cell differentiation</td>
-<td align="right">90</td>
-<td align="right">14</td>
-<td align="right">3</td>
-<td align="right">0.033</td>
-<td align="right">0.214</td>
-<td align="right">3.53e-02</td>
-<td align="left">NFKBIA,NFKBIE,JUN</td>
+<tr>
+<td style="text-align:left;">
+8
+</td>
+<td style="text-align:left;">
+NF-kappa B signaling pathway
+</td>
+<td style="text-align:right;">
+93
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0.032
+</td>
+<td style="text-align:right;">
+0.250
+</td>
+<td style="text-align:right;">
+0.020900
+</td>
+<td style="text-align:left;">
+ICAM1,NFKBIA,TNFAIP3
+</td>
 </tr>
 </tbody>
 </table>
@@ -1992,139 +3099,145 @@ induced.sign &lt;-<span class="st"> </span><span class="kw">rownames</span>(res_
         <span class="dt">organism =</span> <span class="st">&quot;hsapiens&quot;</span>)
     term.induced &lt;-<span class="st"> </span>term.induced[<span class="kw">order</span>(term.induced<span class="op">$</span>p.value), 
         ]
+    <span class="kw">na.omit</span>(term.induced)
+    <span class="cf">if</span> (<span class="kw">nrow</span>(term.induced) <span class="op">&gt;=</span><span class="st"> </span><span class="dv">10</span>) {
+        rowlim =<span class="st"> </span><span class="dv">10</span>
+    } <span class="cf">else</span> {
+        rowlim =<span class="st"> </span><span class="kw">nrow</span>(term.induced)
+    }
     <span class="co"># term.induced$p.value</span>
-    <span class="kw">kable</span>(term.induced[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, <span class="kw">c</span>(<span class="st">&quot;term.name&quot;</span>, 
-        <span class="st">&quot;term.size&quot;</span>, <span class="st">&quot;query.size&quot;</span>, 
-        <span class="st">&quot;overlap.size&quot;</span>, <span class="st">&quot;recall&quot;</span>, 
-        <span class="st">&quot;precision&quot;</span>, <span class="st">&quot;p.value&quot;</span>, 
-        <span class="st">&quot;intersection&quot;</span>)], <span class="dt">format.args =</span> <span class="kw">c</span>(<span class="dt">engeneer =</span> <span class="ot">TRUE</span>, 
-        <span class="dt">digits =</span> <span class="dv">3</span>), <span class="dt">caption =</span> <span class="st">&quot;**Table: induced gene functional analysis wit gProfileR. ** &quot;</span>)
+    <span class="kw">kable</span>(term.induced[<span class="dv">1</span><span class="op">:</span>rowlim, 
+        <span class="kw">c</span>(<span class="st">&quot;term.name&quot;</span>, <span class="st">&quot;term.size&quot;</span>, 
+            <span class="st">&quot;query.size&quot;</span>, <span class="st">&quot;overlap.size&quot;</span>, 
+            <span class="st">&quot;recall&quot;</span>, <span class="st">&quot;precision&quot;</span>, 
+            <span class="st">&quot;p.value&quot;</span>, <span class="st">&quot;intersection&quot;</span>)], 
+        <span class="dt">format.args =</span> <span class="kw">c</span>(<span class="dt">engeneer =</span> <span class="ot">TRUE</span>, 
+            <span class="dt">digits =</span> <span class="dv">3</span>), <span class="dt">caption =</span> <span class="st">&quot;**Table: induced gene functional analysis with gProfileR. ** &quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">        </span><span class="kw">kable_styling</span>(<span class="dt">bootstrap_options =</span> <span class="kw">c</span>(<span class="st">&quot;striped&quot;</span>, 
+            <span class="st">&quot;hover&quot;</span>, <span class="st">&quot;condensed&quot;</span>, 
+            <span class="st">&quot;responsive&quot;</span>))
 }</code></pre></div>
-<table>
-<caption>(#tab:code block 45)<strong>Table: induced gene functional analysis wit gProfileR. </strong></caption>
+<table class="table table-striped table-hover table-condensed table-responsive" style="margin-left: auto; margin-right: auto;">
+<caption>
+(#tab:code block 45)<strong>Table: induced gene functional analysis with gProfileR. </strong>
+</caption>
 <thead>
-<tr class="header">
-<th></th>
-<th align="left">term.name</th>
-<th align="right">term.size</th>
-<th align="right">query.size</th>
-<th align="right">overlap.size</th>
-<th align="right">recall</th>
-<th align="right">precision</th>
-<th align="right">p.value</th>
-<th align="left">intersection</th>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+term.name
+</th>
+<th style="text-align:right;">
+term.size
+</th>
+<th style="text-align:right;">
+query.size
+</th>
+<th style="text-align:right;">
+overlap.size
+</th>
+<th style="text-align:right;">
+recall
+</th>
+<th style="text-align:right;">
+precision
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+<th style="text-align:left;">
+intersection
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td>2</td>
-<td align="left">positive regulation of tau-protein kinase activity</td>
-<td align="right">4</td>
-<td align="right">25</td>
-<td align="right">2</td>
-<td align="right">0.500</td>
-<td align="right">0.080</td>
-<td align="right">0.0200</td>
-<td align="left">EGR1,NAB2</td>
+<tr>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+positive regulation of tau-protein kinase activity
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+23
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.500
+</td>
+<td style="text-align:right;">
+0.087
+</td>
+<td style="text-align:right;">
+0.0193
+</td>
+<td style="text-align:left;">
+EGR1,NAB2
+</td>
 </tr>
-<tr class="even">
-<td>3</td>
-<td align="left">regulation of cellular protein metabolic process</td>
-<td align="right">2438</td>
-<td align="right">25</td>
-<td align="right">12</td>
-<td align="right">0.005</td>
-<td align="right">0.480</td>
-<td align="right">0.0344</td>
-<td align="left">GADD45B,EIF5,EEF2K,GPLD1,EGR1,ID1,HSPA2,ARRDC4,DUSP2,NAB2,SH3BP5L,HSPA1A</td>
+<tr>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:left;">
+Attenuation phase
+</td>
+<td style="text-align:right;">
+14
+</td>
+<td style="text-align:right;">
+13
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.143
+</td>
+<td style="text-align:right;">
+0.154
+</td>
+<td style="text-align:right;">
+0.0334
+</td>
+<td style="text-align:left;">
+HSPA2,HSPA1A
+</td>
 </tr>
-<tr class="odd">
-<td>4</td>
-<td align="left">Attenuation phase</td>
-<td align="right">14</td>
-<td align="right">15</td>
-<td align="right">2</td>
-<td align="right">0.143</td>
-<td align="right">0.133</td>
-<td align="right">0.0439</td>
-<td align="left">HSPA2,HSPA1A</td>
-</tr>
-<tr class="even">
-<td>1</td>
-<td align="left">regulation of tau-protein kinase activity</td>
-<td align="right">6</td>
-<td align="right">25</td>
-<td align="right">2</td>
-<td align="right">0.333</td>
-<td align="right">0.080</td>
-<td align="right">0.0499</td>
-<td align="left">EGR1,NAB2</td>
-</tr>
-<tr class="odd">
-<td>NA</td>
-<td align="left">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="even">
-<td>NA.1</td>
-<td align="left">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="odd">
-<td>NA.2</td>
-<td align="left">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="even">
-<td>NA.3</td>
-<td align="left">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="odd">
-<td>NA.4</td>
-<td align="left">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="even">
-<td>NA.5</td>
-<td align="left">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="left">NA</td>
+<tr>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+regulation of tau-protein kinase activity
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+23
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.333
+</td>
+<td style="text-align:right;">
+0.087
+</td>
+<td style="text-align:right;">
+0.0481
+</td>
+<td style="text-align:left;">
+EGR1,NAB2
+</td>
 </tr>
 </tbody>
 </table>
@@ -2138,139 +3251,348 @@ induced.sign &lt;-<span class="st"> </span><span class="kw">rownames</span>(res_
         <span class="dt">organism =</span> <span class="st">&quot;hsapiens&quot;</span>)
     term.repressed &lt;-<span class="st"> </span>term.repressed[<span class="kw">order</span>(term.repressed<span class="op">$</span>p.value), 
         ]
-    <span class="kw">kable</span>(term.repressed[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, 
+    <span class="kw">na.omit</span>(term.repressed)
+    <span class="cf">if</span> (<span class="kw">nrow</span>(term.repressed) <span class="op">&gt;=</span><span class="st"> </span>
+<span class="st">        </span><span class="dv">10</span>) {
+        rowlim =<span class="st"> </span><span class="dv">10</span>
+    } <span class="cf">else</span> {
+        rowlim =<span class="st"> </span><span class="kw">nrow</span>(term.repressed)
+    }
+    <span class="kw">kable</span>(term.repressed[<span class="dv">1</span><span class="op">:</span>rowlim, 
         <span class="kw">c</span>(<span class="st">&quot;term.name&quot;</span>, <span class="st">&quot;term.size&quot;</span>, 
             <span class="st">&quot;query.size&quot;</span>, <span class="st">&quot;overlap.size&quot;</span>, 
             <span class="st">&quot;recall&quot;</span>, <span class="st">&quot;precision&quot;</span>, 
             <span class="st">&quot;p.value&quot;</span>, <span class="st">&quot;intersection&quot;</span>)], 
         <span class="dt">format.args =</span> <span class="kw">c</span>(<span class="dt">engeneer =</span> <span class="ot">TRUE</span>, 
-            <span class="dt">digits =</span> <span class="dv">3</span>), <span class="dt">caption =</span> <span class="st">&quot;**Table: repressed genes functional analysis with gProfileR. ** &quot;</span>)
+            <span class="dt">digits =</span> <span class="dv">3</span>), <span class="dt">caption =</span> <span class="st">&quot;**Table: repressed genes functional analysis with gProfileR. ** &quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">        </span><span class="kw">kable_styling</span>(<span class="dt">bootstrap_options =</span> <span class="kw">c</span>(<span class="st">&quot;striped&quot;</span>, 
+            <span class="st">&quot;hover&quot;</span>, <span class="st">&quot;condensed&quot;</span>, 
+            <span class="st">&quot;responsive&quot;</span>), <span class="dt">full_width =</span> <span class="ot">FALSE</span>)
 }</code></pre></div>
-<table>
-<caption>(#tab:code block 45)<strong>Table: repressed genes functional analysis with gProfileR. </strong></caption>
+<table class="table table-striped table-hover table-condensed table-responsive" style="width: auto !important; margin-left: auto; margin-right: auto;">
+<caption>
+(#tab:code block 45)<strong>Table: repressed genes functional analysis with gProfileR. </strong>
+</caption>
 <thead>
-<tr class="header">
-<th></th>
-<th align="left">term.name</th>
-<th align="right">term.size</th>
-<th align="right">query.size</th>
-<th align="right">overlap.size</th>
-<th align="right">recall</th>
-<th align="right">precision</th>
-<th align="right">p.value</th>
-<th align="left">intersection</th>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+term.name
+</th>
+<th style="text-align:right;">
+term.size
+</th>
+<th style="text-align:right;">
+query.size
+</th>
+<th style="text-align:right;">
+overlap.size
+</th>
+<th style="text-align:right;">
+recall
+</th>
+<th style="text-align:right;">
+precision
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+<th style="text-align:left;">
+intersection
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td>28</td>
-<td align="left">TNF signaling pathway</td>
-<td align="right">108</td>
-<td align="right">15</td>
-<td align="right">7</td>
-<td align="right">0.065</td>
-<td align="right">0.467</td>
-<td align="right">0.00e+00</td>
-<td align="left">BIRC3,TRAF1,BCL3,ICAM1,NFKBIA,TNFAIP3,JUN</td>
+<tr>
+<td style="text-align:left;">
+28
+</td>
+<td style="text-align:left;">
+TNF signaling pathway
+</td>
+<td style="text-align:right;">
+108
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+0.065
+</td>
+<td style="text-align:right;">
+0.467
+</td>
+<td style="text-align:right;">
+0.00e+00
+</td>
+<td style="text-align:left;">
+BIRC3,TRAF1,BCL3,ICAM1,NFKBIA,TNFAIP3,JUN
+</td>
 </tr>
-<tr class="even">
-<td>29</td>
-<td align="left">NF-kappa B signaling pathway</td>
-<td align="right">93</td>
-<td align="right">15</td>
-<td align="right">6</td>
-<td align="right">0.065</td>
-<td align="right">0.400</td>
-<td align="right">9.00e-07</td>
-<td align="left">BIRC3,TRAF1,ICAM1,NFKBIA,RELB,TNFAIP3</td>
+<tr>
+<td style="text-align:left;">
+33
+</td>
+<td style="text-align:left;">
+NF-kappa B signaling pathway
+</td>
+<td style="text-align:right;">
+93
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+0.065
+</td>
+<td style="text-align:right;">
+0.400
+</td>
+<td style="text-align:right;">
+9.00e-07
+</td>
+<td style="text-align:left;">
+BIRC3,TRAF1,ICAM1,NFKBIA,RELB,TNFAIP3
+</td>
 </tr>
-<tr class="odd">
-<td>30</td>
-<td align="left">Epstein-Barr virus infection</td>
-<td align="right">197</td>
-<td align="right">15</td>
-<td align="right">7</td>
-<td align="right">0.036</td>
-<td align="right">0.467</td>
-<td align="right">2.70e-06</td>
-<td align="left">TRAF1,ICAM1,NFKBIA,RELB,TNFAIP3,NFKBIE,JUN</td>
+<tr>
+<td style="text-align:left;">
+30
+</td>
+<td style="text-align:left;">
+Epstein-Barr virus infection
+</td>
+<td style="text-align:right;">
+197
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+0.036
+</td>
+<td style="text-align:right;">
+0.467
+</td>
+<td style="text-align:right;">
+2.70e-06
+</td>
+<td style="text-align:left;">
+TRAF1,ICAM1,NFKBIA,RELB,TNFAIP3,NFKBIE,JUN
+</td>
 </tr>
-<tr class="even">
-<td>21</td>
-<td align="left">I-kappaB/NF-kappaB complex</td>
-<td align="right">7</td>
-<td align="right">20</td>
-<td align="right">3</td>
-<td align="right">0.429</td>
-<td align="right">0.150</td>
-<td align="right">7.49e-05</td>
-<td align="left">BCL3,NFKBIA,RELB</td>
+<tr>
+<td style="text-align:left;">
+21
+</td>
+<td style="text-align:left;">
+I-kappaB/NF-kappaB complex
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0.429
+</td>
+<td style="text-align:right;">
+0.150
+</td>
+<td style="text-align:right;">
+7.49e-05
+</td>
+<td style="text-align:left;">
+BCL3,NFKBIA,RELB
+</td>
 </tr>
-<tr class="odd">
-<td>12</td>
-<td align="left">regulation of DNA binding transcription factor activity</td>
-<td align="right">400</td>
-<td align="right">20</td>
-<td align="right">7</td>
-<td align="right">0.018</td>
-<td align="right">0.350</td>
-<td align="right">2.14e-04</td>
-<td align="left">TRAF1,ICAM1,NFKBIA,TNFAIP3,BHLHE40,NFKBIE,JUN</td>
+<tr>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+regulation of DNA binding transcription factor activity
+</td>
+<td style="text-align:right;">
+400
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+0.018
+</td>
+<td style="text-align:right;">
+0.350
+</td>
+<td style="text-align:right;">
+2.14e-04
+</td>
+<td style="text-align:left;">
+TRAF1,ICAM1,NFKBIA,TNFAIP3,BHLHE40,NFKBIE,JUN
+</td>
 </tr>
-<tr class="even">
-<td>23</td>
-<td align="left">TNF-alpha/NF-kappa B signaling complex (CHUK, KPNA3, NFKB2, NFKBIB, REL, IKBKG, NFKB1, NFKBIE, RELB, NFKBIA, RELA, TNIP2)</td>
-<td align="right">12</td>
-<td align="right">8</td>
-<td align="right">3</td>
-<td align="right">0.250</td>
-<td align="right">0.375</td>
-<td align="right">3.12e-04</td>
-<td align="left">NFKBIA,RELB,NFKBIE</td>
+<tr>
+<td style="text-align:left;">
+22
+</td>
+<td style="text-align:left;">
+TNF-alpha/NF-kappa B signaling complex (CHUK, KPNA3, NFKB2, NFKBIB, REL, IKBKG, NFKB1, NFKBIE, RELB, NFKBIA, RELA, TNIP2)
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+8
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0.250
+</td>
+<td style="text-align:right;">
+0.375
+</td>
+<td style="text-align:right;">
+3.12e-04
+</td>
+<td style="text-align:left;">
+NFKBIA,RELB,NFKBIE
+</td>
 </tr>
-<tr class="odd">
-<td>41</td>
-<td align="left">TNFR1-induced NFkappaB signaling pathway</td>
-<td align="right">26</td>
-<td align="right">12</td>
-<td align="right">3</td>
-<td align="right">0.115</td>
-<td align="right">0.250</td>
-<td align="right">7.68e-04</td>
-<td align="left">BIRC3,TRAF1,TNFAIP3</td>
+<tr>
+<td style="text-align:left;">
+39
+</td>
+<td style="text-align:left;">
+TNFR1-induced NFkappaB signaling pathway
+</td>
+<td style="text-align:right;">
+26
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0.115
+</td>
+<td style="text-align:right;">
+0.250
+</td>
+<td style="text-align:right;">
+7.68e-04
+</td>
+<td style="text-align:left;">
+BIRC3,TRAF1,TNFAIP3
+</td>
 </tr>
-<tr class="even">
-<td>19</td>
-<td align="left">cellular response to tumor necrosis factor</td>
-<td align="right">290</td>
-<td align="right">20</td>
-<td align="right">6</td>
-<td align="right">0.021</td>
-<td align="right">0.300</td>
-<td align="right">7.94e-04</td>
-<td align="left">BIRC3,TNFRSF9,TRAF1,ICAM1,NFKBIA,TNFAIP3</td>
+<tr>
+<td style="text-align:left;">
+18
+</td>
+<td style="text-align:left;">
+cellular response to tumor necrosis factor
+</td>
+<td style="text-align:right;">
+290
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+0.021
+</td>
+<td style="text-align:right;">
+0.300
+</td>
+<td style="text-align:right;">
+7.94e-04
+</td>
+<td style="text-align:left;">
+BIRC3,TNFRSF9,TRAF1,ICAM1,NFKBIA,TNFAIP3
+</td>
 </tr>
-<tr class="odd">
-<td>18</td>
-<td align="left">response to tumor necrosis factor</td>
-<td align="right">307</td>
-<td align="right">20</td>
-<td align="right">6</td>
-<td align="right">0.020</td>
-<td align="right">0.300</td>
-<td align="right">1.11e-03</td>
-<td align="left">BIRC3,TNFRSF9,TRAF1,ICAM1,NFKBIA,TNFAIP3</td>
+<tr>
+<td style="text-align:left;">
+17
+</td>
+<td style="text-align:left;">
+response to tumor necrosis factor
+</td>
+<td style="text-align:right;">
+307
+</td>
+<td style="text-align:right;">
+20
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+0.020
+</td>
+<td style="text-align:right;">
+0.300
+</td>
+<td style="text-align:right;">
+1.11e-03
+</td>
+<td style="text-align:left;">
+BIRC3,TNFRSF9,TRAF1,ICAM1,NFKBIA,TNFAIP3
+</td>
 </tr>
-<tr class="even">
-<td>40</td>
-<td align="left">Regulation of TNFR1 signaling</td>
-<td align="right">33</td>
-<td align="right">12</td>
-<td align="right">3</td>
-<td align="right">0.091</td>
-<td align="right">0.250</td>
-<td align="right">1.61e-03</td>
-<td align="left">BIRC3,TRAF1,TNFAIP3</td>
+<tr>
+<td style="text-align:left;">
+40
+</td>
+<td style="text-align:left;">
+Regulation of TNFR1 signaling
+</td>
+<td style="text-align:right;">
+33
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0.091
+</td>
+<td style="text-align:right;">
+0.250
+</td>
+<td style="text-align:right;">
+1.61e-03
+</td>
+<td style="text-align:left;">
+BIRC3,TRAF1,TNFAIP3
+</td>
 </tr>
 </tbody>
 </table>
@@ -2364,138 +3686,347 @@ induced.sign &lt;-<span class="st"> </span><span class="kw">rownames</span>(res_
     term.induced &lt;-<span class="st"> </span>term.induced[<span class="kw">order</span>(term.induced<span class="op">$</span>p.value), 
         ]
     <span class="co"># term.induced$p.value</span>
-    <span class="kw">kable</span>(term.induced[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, <span class="kw">c</span>(<span class="st">&quot;term.name&quot;</span>, 
-        <span class="st">&quot;term.size&quot;</span>, <span class="st">&quot;query.size&quot;</span>, 
-        <span class="st">&quot;overlap.size&quot;</span>, <span class="st">&quot;recall&quot;</span>, 
-        <span class="st">&quot;precision&quot;</span>, <span class="st">&quot;p.value&quot;</span>, 
-        <span class="st">&quot;intersection&quot;</span>)], <span class="dt">format.args =</span> <span class="kw">c</span>(<span class="dt">engeneer =</span> <span class="ot">TRUE</span>, 
-        <span class="dt">digits =</span> <span class="dv">3</span>), <span class="dt">caption =</span> <span class="st">&quot;**Table: induced gene functional analysis wit gProfileR. ** &quot;</span>)
+    <span class="kw">na.omit</span>(term.induced)
+    <span class="cf">if</span> (<span class="kw">nrow</span>(term.induced) <span class="op">&gt;=</span><span class="st"> </span><span class="dv">10</span>) {
+        rowlim =<span class="st"> </span><span class="dv">10</span>
+    } <span class="cf">else</span> {
+        rowlim =<span class="st"> </span><span class="kw">nrow</span>(term.induced)
+    }
+    <span class="kw">kable</span>(term.induced[<span class="dv">1</span><span class="op">:</span>rowlim, 
+        <span class="kw">c</span>(<span class="st">&quot;term.name&quot;</span>, <span class="st">&quot;term.size&quot;</span>, 
+            <span class="st">&quot;query.size&quot;</span>, <span class="st">&quot;overlap.size&quot;</span>, 
+            <span class="st">&quot;recall&quot;</span>, <span class="st">&quot;precision&quot;</span>, 
+            <span class="st">&quot;p.value&quot;</span>, <span class="st">&quot;intersection&quot;</span>)], 
+        <span class="dt">format.args =</span> <span class="kw">c</span>(<span class="dt">engeneer =</span> <span class="ot">TRUE</span>, 
+            <span class="dt">digits =</span> <span class="dv">3</span>), <span class="dt">caption =</span> <span class="st">&quot;**Table: induced gene functional analysis with gProfileR. ** &quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">        </span><span class="kw">kable_styling</span>(<span class="dt">bootstrap_options =</span> <span class="kw">c</span>(<span class="st">&quot;striped&quot;</span>, 
+            <span class="st">&quot;hover&quot;</span>, <span class="st">&quot;condensed&quot;</span>, 
+            <span class="st">&quot;responsive&quot;</span>))
 }</code></pre></div>
-<table>
-<caption>(#tab:code block 51)<strong>Table: induced gene functional analysis wit gProfileR. </strong></caption>
+<table class="table table-striped table-hover table-condensed table-responsive" style="margin-left: auto; margin-right: auto;">
+<caption>
+(#tab:code block 51)<strong>Table: induced gene functional analysis with gProfileR. </strong>
+</caption>
 <thead>
-<tr class="header">
-<th></th>
-<th align="left">term.name</th>
-<th align="right">term.size</th>
-<th align="right">query.size</th>
-<th align="right">overlap.size</th>
-<th align="right">recall</th>
-<th align="right">precision</th>
-<th align="right">p.value</th>
-<th align="left">intersection</th>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+term.name
+</th>
+<th style="text-align:right;">
+term.size
+</th>
+<th style="text-align:right;">
+query.size
+</th>
+<th style="text-align:right;">
+overlap.size
+</th>
+<th style="text-align:right;">
+recall
+</th>
+<th style="text-align:right;">
+precision
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+<th style="text-align:left;">
+intersection
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td>36</td>
-<td align="left">Growth hormone receptor signaling</td>
-<td align="right">24</td>
-<td align="right">35</td>
-<td align="right">5</td>
-<td align="right">0.208</td>
-<td align="right">0.143</td>
-<td align="right">3.80e-06</td>
-<td align="left">CISH,SOCS2,SOCS3,SOCS1,IRS2</td>
+<tr>
+<td style="text-align:left;">
+33
+</td>
+<td style="text-align:left;">
+Growth hormone receptor signaling
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+34
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+0.208
+</td>
+<td style="text-align:right;">
+0.147
+</td>
+<td style="text-align:right;">
+3.30e-06
+</td>
+<td style="text-align:left;">
+CISH,SOCS2,SOCS3,SOCS1,IRS2
+</td>
 </tr>
-<tr class="even">
-<td>35</td>
-<td align="left">Cytokine Signaling in Immune system</td>
-<td align="right">685</td>
-<td align="right">35</td>
-<td align="right">12</td>
-<td align="right">0.018</td>
-<td align="right">0.343</td>
-<td align="right">3.36e-04</td>
-<td align="left">OSM,CISH,EGR1,SOCS2,CD80,CDKN1A,PIM1,EIF4A1,FOS,SOCS3,SOCS1,IRS2</td>
+<tr>
+<td style="text-align:left;">
+32
+</td>
+<td style="text-align:left;">
+Cytokine Signaling in Immune system
+</td>
+<td style="text-align:right;">
+685
+</td>
+<td style="text-align:right;">
+34
+</td>
+<td style="text-align:right;">
+12
+</td>
+<td style="text-align:right;">
+0.018
+</td>
+<td style="text-align:right;">
+0.353
+</td>
+<td style="text-align:right;">
+2.39e-04
+</td>
+<td style="text-align:left;">
+OSM,CISH,EGR1,SOCS2,CD80,CDKN1A,PIM1,EIF4A1,FOS,SOCS3,SOCS1,IRS2
+</td>
 </tr>
-<tr class="odd">
-<td>39</td>
-<td align="left">Interleukin-4 and 13 signaling</td>
-<td align="right">111</td>
-<td align="right">35</td>
-<td align="right">6</td>
-<td align="right">0.054</td>
-<td align="right">0.171</td>
-<td align="right">4.71e-04</td>
-<td align="left">OSM,CDKN1A,PIM1,FOS,SOCS3,SOCS1</td>
+<tr>
+<td style="text-align:left;">
+34
+</td>
+<td style="text-align:left;">
+Signaling by Interleukins
+</td>
+<td style="text-align:right;">
+463
+</td>
+<td style="text-align:right;">
+34
+</td>
+<td style="text-align:right;">
+10
+</td>
+<td style="text-align:right;">
+0.022
+</td>
+<td style="text-align:right;">
+0.294
+</td>
+<td style="text-align:right;">
+3.92e-04
+</td>
+<td style="text-align:left;">
+OSM,CISH,SOCS2,CD80,CDKN1A,PIM1,FOS,SOCS3,SOCS1,IRS2
+</td>
 </tr>
-<tr class="even">
-<td>37</td>
-<td align="left">Signaling by Interleukins</td>
-<td align="right">463</td>
-<td align="right">35</td>
-<td align="right">10</td>
-<td align="right">0.022</td>
-<td align="right">0.286</td>
-<td align="right">5.17e-04</td>
-<td align="left">OSM,CISH,SOCS2,CD80,CDKN1A,PIM1,FOS,SOCS3,SOCS1,IRS2</td>
+<tr>
+<td style="text-align:left;">
+36
+</td>
+<td style="text-align:left;">
+Interleukin-4 and 13 signaling
+</td>
+<td style="text-align:right;">
+111
+</td>
+<td style="text-align:right;">
+34
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+0.054
+</td>
+<td style="text-align:right;">
+0.176
+</td>
+<td style="text-align:right;">
+4.01e-04
+</td>
+<td style="text-align:left;">
+OSM,CDKN1A,PIM1,FOS,SOCS3,SOCS1
+</td>
 </tr>
-<tr class="odd">
-<td>34</td>
-<td align="left">Jak-STAT signaling pathway</td>
-<td align="right">162</td>
-<td align="right">35</td>
-<td align="right">7</td>
-<td align="right">0.043</td>
-<td align="right">0.200</td>
-<td align="right">6.45e-04</td>
-<td align="left">OSM,CISH,SOCS2,CDKN1A,PIM1,SOCS3,SOCS1</td>
+<tr>
+<td style="text-align:left;">
+30
+</td>
+<td style="text-align:left;">
+Jak-STAT signaling pathway
+</td>
+<td style="text-align:right;">
+162
+</td>
+<td style="text-align:right;">
+34
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+0.043
+</td>
+<td style="text-align:right;">
+0.206
+</td>
+<td style="text-align:right;">
+4.96e-04
+</td>
+<td style="text-align:left;">
+OSM,CISH,SOCS2,CDKN1A,PIM1,SOCS3,SOCS1
+</td>
 </tr>
-<tr class="even">
-<td>14</td>
-<td align="left">negative regulation of kinase activity</td>
-<td align="right">272</td>
-<td align="right">66</td>
-<td align="right">9</td>
-<td align="right">0.033</td>
-<td align="right">0.136</td>
-<td align="right">1.01e-03</td>
-<td align="left">GADD45B,CISH,SOCS2,CDKN1A,DUSP2,SH3BP5L,SOCS3,SOCS1,IRS2</td>
+<tr>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:left;">
+negative regulation of kinase activity
+</td>
+<td style="text-align:right;">
+272
+</td>
+<td style="text-align:right;">
+66
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+0.033
+</td>
+<td style="text-align:right;">
+0.136
+</td>
+<td style="text-align:right;">
+1.01e-03
+</td>
+<td style="text-align:left;">
+GADD45B,CISH,SOCS2,CDKN1A,DUSP2,SH3BP5L,SOCS3,SOCS1,IRS2
+</td>
 </tr>
-<tr class="odd">
-<td>32</td>
-<td align="left">Prolactin signaling pathway</td>
-<td align="right">70</td>
-<td align="right">35</td>
-<td align="right">5</td>
-<td align="right">0.071</td>
-<td align="right">0.143</td>
-<td align="right">1.27e-03</td>
-<td align="left">CISH,SOCS2,FOS,SOCS3,SOCS1</td>
+<tr>
+<td style="text-align:left;">
+29
+</td>
+<td style="text-align:left;">
+Prolactin signaling pathway
+</td>
+<td style="text-align:right;">
+70
+</td>
+<td style="text-align:right;">
+34
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+0.071
+</td>
+<td style="text-align:right;">
+0.147
+</td>
+<td style="text-align:right;">
+1.04e-03
+</td>
+<td style="text-align:left;">
+CISH,SOCS2,FOS,SOCS3,SOCS1
+</td>
 </tr>
-<tr class="even">
-<td>38</td>
-<td align="left">Interleukin-7 signaling</td>
-<td align="right">36</td>
-<td align="right">35</td>
-<td align="right">4</td>
-<td align="right">0.111</td>
-<td align="right">0.114</td>
-<td align="right">1.74e-03</td>
-<td align="left">CISH,SOCS2,SOCS1,IRS2</td>
+<tr>
+<td style="text-align:left;">
+37
+</td>
+<td style="text-align:left;">
+Factor: E2F; motif: GGCGSG; match class: 1
+</td>
+<td style="text-align:right;">
+10205
+</td>
+<td style="text-align:right;">
+65
+</td>
+<td style="text-align:right;">
+53
+</td>
+<td style="text-align:right;">
+0.005
+</td>
+<td style="text-align:right;">
+0.815
+</td>
+<td style="text-align:right;">
+1.05e-03
+</td>
+<td style="text-align:left;">
+KLF6,GADD45B,OSM,EIF5,EEF2K,RASD1,CISH,MREG,KLF9,EGR1,SOCS2,ARL4A,IKZF4,CDKN1A,SOX21,ID1,HSPA2,CHAC1,PIM1,ARRDC4,SIK1,RGS16,RHOB,FAM83A,KLF10,RAB11FIP1,DUSP2,EIF4A1,AGGF1,MB21D1,KCNK5,C10ORF10,NAB2,FAM102A,RHEBL1,MAT2A,B3GALNT1,FOS,KLF11,STARD5,HSPA6,SH3BP5L,CDK5R1,SOCS3,OSBP2,SOCS1,IRS2,HPDL,TSC22D2,ZNF470,NRARP,CCDC71L,PIGW
+</td>
 </tr>
-<tr class="odd">
-<td>13</td>
-<td align="left">negative regulation of transferase activity</td>
-<td align="right">298</td>
-<td align="right">66</td>
-<td align="right">9</td>
-<td align="right">0.030</td>
-<td align="right">0.136</td>
-<td align="right">2.18e-03</td>
-<td align="left">GADD45B,CISH,SOCS2,CDKN1A,DUSP2,SH3BP5L,SOCS3,SOCS1,IRS2</td>
+<tr>
+<td style="text-align:left;">
+35
+</td>
+<td style="text-align:left;">
+Interleukin-7 signaling
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+34
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+0.111
+</td>
+<td style="text-align:right;">
+0.118
+</td>
+<td style="text-align:right;">
+1.57e-03
+</td>
+<td style="text-align:left;">
+CISH,SOCS2,SOCS1,IRS2
+</td>
 </tr>
-<tr class="even">
-<td>31</td>
-<td align="left">protein kinase inhibitor activity</td>
-<td align="right">95</td>
-<td align="right">66</td>
-<td align="right">6</td>
-<td align="right">0.063</td>
-<td align="right">0.091</td>
-<td align="right">2.52e-03</td>
-<td align="left">CISH,SOCS2,CDKN1A,SH3BP5L,SOCS3,SOCS1</td>
+<tr>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+negative regulation of transferase activity
+</td>
+<td style="text-align:right;">
+298
+</td>
+<td style="text-align:right;">
+66
+</td>
+<td style="text-align:right;">
+9
+</td>
+<td style="text-align:right;">
+0.030
+</td>
+<td style="text-align:right;">
+0.136
+</td>
+<td style="text-align:right;">
+2.18e-03
+</td>
+<td style="text-align:left;">
+GADD45B,CISH,SOCS2,CDKN1A,DUSP2,SH3BP5L,SOCS3,SOCS1,IRS2
+</td>
 </tr>
 </tbody>
 </table>
@@ -2508,139 +4039,348 @@ induced.sign &lt;-<span class="st"> </span><span class="kw">rownames</span>(res_
         <span class="dt">organism =</span> <span class="st">&quot;hsapiens&quot;</span>)
     term.repressed &lt;-<span class="st"> </span>term.repressed[<span class="kw">order</span>(term.repressed<span class="op">$</span>p.value), 
         ]
-    <span class="kw">kable</span>(term.repressed[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, 
+    <span class="kw">na.omit</span>(term.repressed)
+    <span class="cf">if</span> (<span class="kw">nrow</span>(term.repressed) <span class="op">&gt;=</span><span class="st"> </span>
+<span class="st">        </span><span class="dv">10</span>) {
+        rowlim =<span class="st"> </span><span class="dv">10</span>
+    } <span class="cf">else</span> {
+        rowlim =<span class="st"> </span><span class="kw">nrow</span>(term.repressed)
+    }
+    <span class="kw">kable</span>(term.repressed[<span class="dv">1</span><span class="op">:</span>rowlim, 
         <span class="kw">c</span>(<span class="st">&quot;term.name&quot;</span>, <span class="st">&quot;term.size&quot;</span>, 
             <span class="st">&quot;query.size&quot;</span>, <span class="st">&quot;overlap.size&quot;</span>, 
             <span class="st">&quot;recall&quot;</span>, <span class="st">&quot;precision&quot;</span>, 
             <span class="st">&quot;p.value&quot;</span>, <span class="st">&quot;intersection&quot;</span>)], 
         <span class="dt">format.args =</span> <span class="kw">c</span>(<span class="dt">engeneer =</span> <span class="ot">TRUE</span>, 
-            <span class="dt">digits =</span> <span class="dv">3</span>), <span class="dt">caption =</span> <span class="st">&quot;**Table: repressed genes functional analysis with gProfileR. ** &quot;</span>)
+            <span class="dt">digits =</span> <span class="dv">3</span>), <span class="dt">caption =</span> <span class="st">&quot;**Table: repressed genes functional analysis with gProfileR. ** &quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">        </span><span class="kw">kable_styling</span>(<span class="dt">bootstrap_options =</span> <span class="kw">c</span>(<span class="st">&quot;striped&quot;</span>, 
+            <span class="st">&quot;hover&quot;</span>, <span class="st">&quot;condensed&quot;</span>, 
+            <span class="st">&quot;responsive&quot;</span>))
 }</code></pre></div>
-<table>
-<caption>(#tab:code block 51)<strong>Table: repressed genes functional analysis with gProfileR. </strong></caption>
+<table class="table table-striped table-hover table-condensed table-responsive" style="margin-left: auto; margin-right: auto;">
+<caption>
+(#tab:code block 51)<strong>Table: repressed genes functional analysis with gProfileR. </strong>
+</caption>
 <thead>
-<tr class="header">
-<th></th>
-<th align="left">term.name</th>
-<th align="right">term.size</th>
-<th align="right">query.size</th>
-<th align="right">overlap.size</th>
-<th align="right">recall</th>
-<th align="right">precision</th>
-<th align="right">p.value</th>
-<th align="left">intersection</th>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+term.name
+</th>
+<th style="text-align:right;">
+term.size
+</th>
+<th style="text-align:right;">
+query.size
+</th>
+<th style="text-align:right;">
+overlap.size
+</th>
+<th style="text-align:right;">
+recall
+</th>
+<th style="text-align:right;">
+precision
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+<th style="text-align:left;">
+intersection
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td>16</td>
-<td align="left">TNF signaling pathway</td>
-<td align="right">108</td>
-<td align="right">17</td>
-<td align="right">7</td>
-<td align="right">0.065</td>
-<td align="right">0.412</td>
-<td align="right">1.00e-07</td>
-<td align="left">BIRC3,TRAF1,BCL3,ICAM1,NFKBIA,TNFAIP3,JUN</td>
+<tr>
+<td style="text-align:left;">
+14
+</td>
+<td style="text-align:left;">
+TNF signaling pathway
+</td>
+<td style="text-align:right;">
+108
+</td>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+0.065
+</td>
+<td style="text-align:right;">
+0.412
+</td>
+<td style="text-align:right;">
+1.00e-07
+</td>
+<td style="text-align:left;">
+BIRC3,TRAF1,BCL3,ICAM1,NFKBIA,TNFAIP3,JUN
+</td>
 </tr>
-<tr class="even">
-<td>15</td>
-<td align="left">NF-kappa B signaling pathway</td>
-<td align="right">93</td>
-<td align="right">17</td>
-<td align="right">5</td>
-<td align="right">0.054</td>
-<td align="right">0.294</td>
-<td align="right">9.21e-05</td>
-<td align="left">BIRC3,TRAF1,ICAM1,NFKBIA,TNFAIP3</td>
+<tr>
+<td style="text-align:left;">
+13
+</td>
+<td style="text-align:left;">
+NF-kappa B signaling pathway
+</td>
+<td style="text-align:right;">
+93
+</td>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+0.054
+</td>
+<td style="text-align:right;">
+0.294
+</td>
+<td style="text-align:right;">
+9.21e-05
+</td>
+<td style="text-align:left;">
+BIRC3,TRAF1,ICAM1,NFKBIA,TNFAIP3
+</td>
 </tr>
-<tr class="odd">
-<td>4</td>
-<td align="left">cellular response to tumor necrosis factor</td>
-<td align="right">290</td>
-<td align="right">24</td>
-<td align="right">7</td>
-<td align="right">0.024</td>
-<td align="right">0.292</td>
-<td align="right">9.55e-05</td>
-<td align="left">BIRC3,TNFRSF9,TRAF1,ICAM1,NFKBIA,TNFAIP3,ZFP36L2</td>
+<tr>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:left;">
+cellular response to tumor necrosis factor
+</td>
+<td style="text-align:right;">
+290
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+0.024
+</td>
+<td style="text-align:right;">
+0.292
+</td>
+<td style="text-align:right;">
+9.55e-05
+</td>
+<td style="text-align:left;">
+BIRC3,TNFRSF9,TRAF1,ICAM1,NFKBIA,TNFAIP3,ZFP36L2
+</td>
 </tr>
-<tr class="even">
-<td>3</td>
-<td align="left">response to tumor necrosis factor</td>
-<td align="right">307</td>
-<td align="right">24</td>
-<td align="right">7</td>
-<td align="right">0.023</td>
-<td align="right">0.292</td>
-<td align="right">1.41e-04</td>
-<td align="left">BIRC3,TNFRSF9,TRAF1,ICAM1,NFKBIA,TNFAIP3,ZFP36L2</td>
+<tr>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+response to tumor necrosis factor
+</td>
+<td style="text-align:right;">
+307
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+0.023
+</td>
+<td style="text-align:right;">
+0.292
+</td>
+<td style="text-align:right;">
+1.41e-04
+</td>
+<td style="text-align:left;">
+BIRC3,TNFRSF9,TRAF1,ICAM1,NFKBIA,TNFAIP3,ZFP36L2
+</td>
 </tr>
-<tr class="odd">
-<td>7</td>
-<td align="left">liver development</td>
-<td align="right">139</td>
-<td align="right">24</td>
-<td align="right">5</td>
-<td align="right">0.036</td>
-<td align="right">0.208</td>
-<td align="right">1.47e-03</td>
-<td align="left">NFKBIA,TNFAIP3,SLCO2B1,CITED2,JUN</td>
+<tr>
+<td style="text-align:left;">
+6
+</td>
+<td style="text-align:left;">
+liver development
+</td>
+<td style="text-align:right;">
+139
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+0.036
+</td>
+<td style="text-align:right;">
+0.208
+</td>
+<td style="text-align:right;">
+1.47e-03
+</td>
+<td style="text-align:left;">
+NFKBIA,TNFAIP3,SLCO2B1,CITED2,JUN
+</td>
 </tr>
-<tr class="even">
-<td>21</td>
-<td align="left">TNFR1-induced NFkappaB signaling pathway</td>
-<td align="right">26</td>
-<td align="right">15</td>
-<td align="right">3</td>
-<td align="right">0.115</td>
-<td align="right">0.200</td>
-<td align="right">1.53e-03</td>
-<td align="left">BIRC3,TRAF1,TNFAIP3</td>
+<tr>
+<td style="text-align:left;">
+21
+</td>
+<td style="text-align:left;">
+TNFR1-induced NFkappaB signaling pathway
+</td>
+<td style="text-align:right;">
+26
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0.115
+</td>
+<td style="text-align:right;">
+0.200
+</td>
+<td style="text-align:right;">
+1.53e-03
+</td>
+<td style="text-align:left;">
+BIRC3,TRAF1,TNFAIP3
+</td>
 </tr>
-<tr class="odd">
-<td>6</td>
-<td align="left">hepaticobiliary system development</td>
-<td align="right">142</td>
-<td align="right">24</td>
-<td align="right">5</td>
-<td align="right">0.035</td>
-<td align="right">0.208</td>
-<td align="right">1.64e-03</td>
-<td align="left">NFKBIA,TNFAIP3,SLCO2B1,CITED2,JUN</td>
+<tr>
+<td style="text-align:left;">
+5
+</td>
+<td style="text-align:left;">
+hepaticobiliary system development
+</td>
+<td style="text-align:right;">
+142
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+0.035
+</td>
+<td style="text-align:right;">
+0.208
+</td>
+<td style="text-align:right;">
+1.64e-03
+</td>
+<td style="text-align:left;">
+NFKBIA,TNFAIP3,SLCO2B1,CITED2,JUN
+</td>
 </tr>
-<tr class="even">
-<td>22</td>
-<td align="left">Regulation of TNFR1 signaling</td>
-<td align="right">33</td>
-<td align="right">15</td>
-<td align="right">3</td>
-<td align="right">0.091</td>
-<td align="right">0.200</td>
-<td align="right">3.20e-03</td>
-<td align="left">BIRC3,TRAF1,TNFAIP3</td>
+<tr>
+<td style="text-align:left;">
+20
+</td>
+<td style="text-align:left;">
+Regulation of TNFR1 signaling
+</td>
+<td style="text-align:right;">
+33
+</td>
+<td style="text-align:right;">
+15
+</td>
+<td style="text-align:right;">
+3
+</td>
+<td style="text-align:right;">
+0.091
+</td>
+<td style="text-align:right;">
+0.200
+</td>
+<td style="text-align:right;">
+3.20e-03
+</td>
+<td style="text-align:left;">
+BIRC3,TRAF1,TNFAIP3
+</td>
 </tr>
-<tr class="odd">
-<td>13</td>
-<td align="left">Epstein-Barr virus infection</td>
-<td align="right">197</td>
-<td align="right">17</td>
-<td align="right">5</td>
-<td align="right">0.025</td>
-<td align="right">0.294</td>
-<td align="right">3.60e-03</td>
-<td align="left">TRAF1,ICAM1,NFKBIA,TNFAIP3,JUN</td>
+<tr>
+<td style="text-align:left;">
+16
+</td>
+<td style="text-align:left;">
+Epstein-Barr virus infection
+</td>
+<td style="text-align:right;">
+197
+</td>
+<td style="text-align:right;">
+17
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+0.025
+</td>
+<td style="text-align:right;">
+0.294
+</td>
+<td style="text-align:right;">
+3.60e-03
+</td>
+<td style="text-align:left;">
+TRAF1,ICAM1,NFKBIA,TNFAIP3,JUN
+</td>
 </tr>
-<tr class="even">
-<td>5</td>
-<td align="left">tumor necrosis factor-mediated signaling pathway</td>
-<td align="right">174</td>
-<td align="right">24</td>
-<td align="right">5</td>
-<td align="right">0.029</td>
-<td align="right">0.208</td>
-<td align="right">4.46e-03</td>
-<td align="left">BIRC3,TNFRSF9,TRAF1,NFKBIA,TNFAIP3</td>
+<tr>
+<td style="text-align:left;">
+4
+</td>
+<td style="text-align:left;">
+tumor necrosis factor-mediated signaling pathway
+</td>
+<td style="text-align:right;">
+174
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+0.029
+</td>
+<td style="text-align:right;">
+0.208
+</td>
+<td style="text-align:right;">
+4.46e-03
+</td>
+<td style="text-align:left;">
+BIRC3,TNFRSF9,TRAF1,NFKBIA,TNFAIP3
+</td>
 </tr>
 </tbody>
 </table>
@@ -2734,138 +4474,260 @@ induced.sign &lt;-<span class="st"> </span><span class="kw">rownames</span>(res_
     term.induced &lt;-<span class="st"> </span>term.induced[<span class="kw">order</span>(term.induced<span class="op">$</span>p.value), 
         ]
     <span class="co"># term.induced$p.value</span>
-    <span class="kw">kable</span>(term.induced[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, <span class="kw">c</span>(<span class="st">&quot;term.name&quot;</span>, 
-        <span class="st">&quot;term.size&quot;</span>, <span class="st">&quot;query.size&quot;</span>, 
-        <span class="st">&quot;overlap.size&quot;</span>, <span class="st">&quot;recall&quot;</span>, 
-        <span class="st">&quot;precision&quot;</span>, <span class="st">&quot;p.value&quot;</span>, 
-        <span class="st">&quot;intersection&quot;</span>)], <span class="dt">format.args =</span> <span class="kw">c</span>(<span class="dt">engeneer =</span> <span class="ot">TRUE</span>, 
-        <span class="dt">digits =</span> <span class="dv">3</span>), <span class="dt">caption =</span> <span class="st">&quot;**Table: induced gene functional analysis wit gProfileR. ** &quot;</span>)
+    <span class="kw">na.omit</span>(term.induced)
+    <span class="cf">if</span> (<span class="kw">nrow</span>(term.induced) <span class="op">&gt;=</span><span class="st"> </span><span class="dv">10</span>) {
+        rowlim =<span class="st"> </span><span class="dv">10</span>
+    } <span class="cf">else</span> {
+        rowlim =<span class="st"> </span><span class="kw">nrow</span>(term.induced)
+    }
+    <span class="kw">kable</span>(term.induced[<span class="dv">1</span><span class="op">:</span>rowlim, 
+        <span class="kw">c</span>(<span class="st">&quot;term.name&quot;</span>, <span class="st">&quot;term.size&quot;</span>, 
+            <span class="st">&quot;query.size&quot;</span>, <span class="st">&quot;overlap.size&quot;</span>, 
+            <span class="st">&quot;recall&quot;</span>, <span class="st">&quot;precision&quot;</span>, 
+            <span class="st">&quot;p.value&quot;</span>, <span class="st">&quot;intersection&quot;</span>)], 
+        <span class="dt">format.args =</span> <span class="kw">c</span>(<span class="dt">engeneer =</span> <span class="ot">TRUE</span>, 
+            <span class="dt">digits =</span> <span class="dv">3</span>), <span class="dt">caption =</span> <span class="st">&quot;**Table: induced gene functional analysis with gProfileR. ** &quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">        </span><span class="kw">kable_styling</span>(<span class="dt">bootstrap_options =</span> <span class="kw">c</span>(<span class="st">&quot;striped&quot;</span>, 
+            <span class="st">&quot;hover&quot;</span>, <span class="st">&quot;condensed&quot;</span>, 
+            <span class="st">&quot;responsive&quot;</span>))
 }</code></pre></div>
-<table>
-<caption>(#tab:code block 57)<strong>Table: induced gene functional analysis wit gProfileR. </strong></caption>
+<table class="table table-striped table-hover table-condensed table-responsive" style="margin-left: auto; margin-right: auto;">
+<caption>
+(#tab:code block 57)<strong>Table: induced gene functional analysis with gProfileR. </strong>
+</caption>
 <thead>
-<tr class="header">
-<th></th>
-<th align="left">term.name</th>
-<th align="right">term.size</th>
-<th align="right">query.size</th>
-<th align="right">overlap.size</th>
-<th align="right">recall</th>
-<th align="right">precision</th>
-<th align="right">p.value</th>
-<th align="left">intersection</th>
+<tr>
+<th style="text-align:left;">
+</th>
+<th style="text-align:left;">
+term.name
+</th>
+<th style="text-align:right;">
+term.size
+</th>
+<th style="text-align:right;">
+query.size
+</th>
+<th style="text-align:right;">
+overlap.size
+</th>
+<th style="text-align:right;">
+recall
+</th>
+<th style="text-align:right;">
+precision
+</th>
+<th style="text-align:right;">
+p.value
+</th>
+<th style="text-align:left;">
+intersection
+</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
-<td>3</td>
-<td align="left">Jak-STAT signaling pathway</td>
-<td align="right">162</td>
-<td align="right">6</td>
-<td align="right">4</td>
-<td align="right">0.025</td>
-<td align="right">0.667</td>
-<td align="right">0.000146</td>
-<td align="left">OSM,CISH,SOCS2,PIM1</td>
+<tr>
+<td style="text-align:left;">
+3
+</td>
+<td style="text-align:left;">
+Jak-STAT signaling pathway
+</td>
+<td style="text-align:right;">
+162
+</td>
+<td style="text-align:right;">
+6
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+0.025
+</td>
+<td style="text-align:right;">
+0.667
+</td>
+<td style="text-align:right;">
+0.000146
+</td>
+<td style="text-align:left;">
+OSM,CISH,SOCS2,PIM1
+</td>
 </tr>
-<tr class="even">
-<td>4</td>
-<td align="left">Cytokine Signaling in Immune system</td>
-<td align="right">685</td>
-<td align="right">7</td>
-<td align="right">5</td>
-<td align="right">0.007</td>
-<td align="right">0.714</td>
-<td align="right">0.004300</td>
-<td align="left">OSM,CISH,EGR1,SOCS2,PIM1</td>
+<tr>
+<td style="text-align:left;">
+4
+</td>
+<td style="text-align:left;">
+Cytokine Signaling in Immune system
+</td>
+<td style="text-align:right;">
+685
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+5
+</td>
+<td style="text-align:right;">
+0.007
+</td>
+<td style="text-align:right;">
+0.714
+</td>
+<td style="text-align:right;">
+0.004300
+</td>
+<td style="text-align:left;">
+OSM,CISH,EGR1,SOCS2,PIM1
+</td>
 </tr>
-<tr class="odd">
-<td>7</td>
-<td align="left">Growth hormone receptor signaling</td>
-<td align="right">24</td>
-<td align="right">7</td>
-<td align="right">2</td>
-<td align="right">0.083</td>
-<td align="right">0.286</td>
-<td align="right">0.020700</td>
-<td align="left">CISH,SOCS2</td>
+<tr>
+<td style="text-align:left;">
+7
+</td>
+<td style="text-align:left;">
+Growth hormone receptor signaling
+</td>
+<td style="text-align:right;">
+24
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.083
+</td>
+<td style="text-align:right;">
+0.286
+</td>
+<td style="text-align:right;">
+0.020700
+</td>
+<td style="text-align:left;">
+CISH,SOCS2
+</td>
 </tr>
-<tr class="even">
-<td>5</td>
-<td align="left">Signaling by Interleukins</td>
-<td align="right">463</td>
-<td align="right">7</td>
-<td align="right">4</td>
-<td align="right">0.009</td>
-<td align="right">0.571</td>
-<td align="right">0.023100</td>
-<td align="left">OSM,CISH,SOCS2,PIM1</td>
+<tr>
+<td style="text-align:left;">
+5
+</td>
+<td style="text-align:left;">
+Signaling by Interleukins
+</td>
+<td style="text-align:right;">
+463
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+4
+</td>
+<td style="text-align:right;">
+0.009
+</td>
+<td style="text-align:right;">
+0.571
+</td>
+<td style="text-align:right;">
+0.023100
+</td>
+<td style="text-align:left;">
+OSM,CISH,SOCS2,PIM1
+</td>
 </tr>
-<tr class="odd">
-<td>6</td>
-<td align="left">Interleukin-7 signaling</td>
-<td align="right">36</td>
-<td align="right">7</td>
-<td align="right">2</td>
-<td align="right">0.056</td>
-<td align="right">0.286</td>
-<td align="right">0.047100</td>
-<td align="left">CISH,SOCS2</td>
+<tr>
+<td style="text-align:left;">
+6
+</td>
+<td style="text-align:left;">
+Interleukin-7 signaling
+</td>
+<td style="text-align:right;">
+36
+</td>
+<td style="text-align:right;">
+7
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+0.056
+</td>
+<td style="text-align:right;">
+0.286
+</td>
+<td style="text-align:right;">
+0.047100
+</td>
+<td style="text-align:left;">
+CISH,SOCS2
+</td>
 </tr>
-<tr class="even">
-<td>1</td>
-<td align="left">EGR-EP300 complex</td>
-<td align="right">2</td>
-<td align="right">2</td>
-<td align="right">1</td>
-<td align="right">0.500</td>
-<td align="right">0.500</td>
-<td align="right">0.049800</td>
-<td align="left">EGR1</td>
+<tr>
+<td style="text-align:left;">
+1
+</td>
+<td style="text-align:left;">
+RCP-Rab11 complex
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0.500
+</td>
+<td style="text-align:right;">
+0.500
+</td>
+<td style="text-align:right;">
+0.049800
+</td>
+<td style="text-align:left;">
+RAB11FIP1
+</td>
 </tr>
-<tr class="odd">
-<td>2</td>
-<td align="left">RCP-Rab11 complex</td>
-<td align="right">2</td>
-<td align="right">2</td>
-<td align="right">1</td>
-<td align="right">0.500</td>
-<td align="right">0.500</td>
-<td align="right">0.049800</td>
-<td align="left">RAB11FIP1</td>
-</tr>
-<tr class="even">
-<td>NA</td>
-<td align="left">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="odd">
-<td>NA.1</td>
-<td align="left">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="left">NA</td>
-</tr>
-<tr class="even">
-<td>NA.2</td>
-<td align="left">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="right">NA</td>
-<td align="left">NA</td>
+<tr>
+<td style="text-align:left;">
+2
+</td>
+<td style="text-align:left;">
+EGR-EP300 complex
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+2
+</td>
+<td style="text-align:right;">
+1
+</td>
+<td style="text-align:right;">
+0.500
+</td>
+<td style="text-align:right;">
+0.500
+</td>
+<td style="text-align:right;">
+0.049800
+</td>
+<td style="text-align:left;">
+EGR1
+</td>
 </tr>
 </tbody>
 </table>
@@ -2878,13 +4740,23 @@ induced.sign &lt;-<span class="st"> </span><span class="kw">rownames</span>(res_
         <span class="dt">organism =</span> <span class="st">&quot;hsapiens&quot;</span>)
     term.repressed &lt;-<span class="st"> </span>term.repressed[<span class="kw">order</span>(term.repressed<span class="op">$</span>p.value), 
         ]
-    <span class="kw">kable</span>(term.repressed[<span class="dv">1</span><span class="op">:</span><span class="dv">10</span>, 
+    <span class="kw">na.omit</span>(term.repressed)
+    <span class="cf">if</span> (<span class="kw">nrow</span>(term.repressed) <span class="op">&gt;=</span><span class="st"> </span>
+<span class="st">        </span><span class="dv">10</span>) {
+        rowlim =<span class="st"> </span><span class="dv">10</span>
+    } <span class="cf">else</span> {
+        rowlim =<span class="st"> </span><span class="kw">nrow</span>(term.repressed)
+    }
+    <span class="kw">kable</span>(term.repressed[<span class="dv">1</span><span class="op">:</span>rowlim, 
         <span class="kw">c</span>(<span class="st">&quot;term.name&quot;</span>, <span class="st">&quot;term.size&quot;</span>, 
             <span class="st">&quot;query.size&quot;</span>, <span class="st">&quot;overlap.size&quot;</span>, 
             <span class="st">&quot;recall&quot;</span>, <span class="st">&quot;precision&quot;</span>, 
             <span class="st">&quot;p.value&quot;</span>, <span class="st">&quot;intersection&quot;</span>)], 
         <span class="dt">format.args =</span> <span class="kw">c</span>(<span class="dt">engeneer =</span> <span class="ot">TRUE</span>, 
-            <span class="dt">digits =</span> <span class="dv">3</span>), <span class="dt">caption =</span> <span class="st">&quot;**Table: repressed genes functional analysis with gProfileR. ** &quot;</span>)
+            <span class="dt">digits =</span> <span class="dv">3</span>), <span class="dt">caption =</span> <span class="st">&quot;**Table: repressed genes functional analysis with gProfileR. ** &quot;</span>) <span class="op">%&gt;%</span><span class="st"> </span>
+<span class="st">        </span><span class="kw">kable_styling</span>(<span class="dt">bootstrap_options =</span> <span class="kw">c</span>(<span class="st">&quot;striped&quot;</span>, 
+            <span class="st">&quot;hover&quot;</span>, <span class="st">&quot;condensed&quot;</span>, 
+            <span class="st">&quot;responsive&quot;</span>))
 }</code></pre></div>
 <pre><code>## No genes found that have repressed expression</code></pre>
 <div class="sourceCode"><pre class="sourceCode r"><code class="sourceCode r"><span class="co"># kable(head(term.induced[,c(&#39;p.value&#39;,</span>
