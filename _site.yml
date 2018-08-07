@@ -1,0 +1,7 @@
+name: "rna-cfu-e-august-2018"
+output_dir: "."
+navbar:
+  title: "Clustering and differential expression of CFU-e cells w.r.t different treatments"
+  left:
+    - text: "HOME"
+      href: _main.html
